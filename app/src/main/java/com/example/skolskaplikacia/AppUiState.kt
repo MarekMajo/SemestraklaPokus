@@ -1,5 +1,5 @@
 package com.example.skolskaplikacia
 
-data class GameUiState(
-    val currentScrambledWord: String = ""
+data class AppUiState(
+    val slovo: String = ""
 )
