@@ -36,13 +36,17 @@ fun Aplikacia(
                 LoginScreen(modifier = Modifier
                     .background(Color(0xFF8ECEC0))
                     .fillMaxSize(),
-                    LoginBTN = { navController.navigate(Obrazovky.menu.name) }
+                    viewModel = viewModel,
+                    LoginBTN = { navController.navigate(Obrazovky.menu.name)}
 
                 )
             }
 
             composable(route = Obrazovky.menu.name) {
-                MenuScreen(modifier = Modifier,
+                MenuScreen(modifier = Modifier
+                    .background(Color(0xFF8ECEC0))
+                    .fillMaxSize(),
+                    viewModel = viewModel,
                     LogoutBTN = { navController.navigate(Obrazovky.login.name) }
                 )
             }
