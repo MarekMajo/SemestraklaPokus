@@ -13,8 +13,6 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,19 +20,17 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import com.example.skolskaplikacia.AppViewModel
+import com.example.skolskaplikacia.viewModels.LoginViewModel
 import com.example.skolskaplikacia.R
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun LoginScreen (
     modifier : Modifier = Modifier,
-    viewModel: AppViewModel,
+    viewModel: LoginViewModel = viewModel(),
     LoginBTN: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val prMeno = rememberSaveable { mutableStateOf("") }
-    val prHeslo = rememberSaveable { mutableStateOf("") }
-
 
     Column (
         modifier = modifier,
@@ -47,14 +43,14 @@ fun LoginScreen (
             modifier = Modifier.width(200.dp)
         )
         TextField(
-            value = prMeno.value,
-            onValueChange = {newText -> prMeno.value = newText},
+            value = uiState.userName,
+            onValueChange = {newText -> viewModel.updateUserName(newText)},
             label = { Text("Prihlasovacie Meno alebo ID")},
             singleLine = true
         )
         TextField(
-            value = prHeslo.value,
-            onValueChange = {newText -> prHeslo.value = newText},
+            value = uiState.userPassword,
+            onValueChange = {newText -> viewModel.updateUserPassword(newText)},
             label = { Text("Prihlasovacie Heslo")},
             singleLine = true,
             visualTransformation = PasswordVisualTransformation(),
@@ -62,7 +58,7 @@ fun LoginScreen (
         )
         Button(
             onClick = {
-                viewModel.login(prMeno.value, prHeslo.value)
+                viewModel.login(uiState.userName, uiState.userPassword)
             }
         ) {
             Text(text = "Prihlásiť")
@@ -70,7 +66,7 @@ fun LoginScreen (
         Spacer(modifier = Modifier.height(8.dp))
         when (uiState.userID) {
             -2 -> Text(text = "Nepodarilo sa pripojiť k sieti", color = Color.Red)
-            -1 -> Text(text = "nesprávne prihlasovacie údaje", color = Color.Red)
+            -1 -> Text(text = "Nesprávne zadané prihlasovacie údaje", color = Color.Red)
             0 -> {}
             else -> LoginBTN()
         }

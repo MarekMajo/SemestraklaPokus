@@ -5,16 +5,17 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.example.skolskaplikacia.AppViewModel
+import com.example.skolskaplikacia.viewModels.LoginViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun MenuScreen(
     modifier: Modifier = Modifier,
-    viewModel: AppViewModel,
+    viewModel: LoginViewModel = viewModel(),
     LogoutBTN : () -> Unit = {}
 ) {
     Column {
-        Text(text = "Menu Sceen")
+        Text(text = "Menu Screen")
         Button(
             onClick = {
                 viewModel.logout()
