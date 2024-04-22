@@ -16,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -23,12 +24,16 @@ import androidx.compose.ui.unit.dp
 import com.example.skolskaplikacia.viewModels.LoginViewModel
 import com.example.skolskaplikacia.R
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.skolskaplikacia.databaza.AppDatabaza
+import com.example.skolskaplikacia.network.RetrofitClient
+import com.example.skolskaplikacia.repository.DatabaseFactory
+import com.example.skolskaplikacia.repository.OsobaRepository
 
 @Composable
 fun LoginScreen (
     modifier : Modifier = Modifier,
-    viewModel: LoginViewModel = viewModel(),
-    LoginBTN: () -> Unit = {}
+    LoginBTN: () -> Unit = {},
+    viewModel: LoginViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
