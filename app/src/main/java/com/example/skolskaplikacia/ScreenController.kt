@@ -19,7 +19,9 @@ import com.example.skolskaplikacia.obrazovky.LoginScreen
 import com.example.skolskaplikacia.obrazovky.MenuScreen
 import com.example.skolskaplikacia.repository.DatabaseFactory
 import com.example.skolskaplikacia.repository.OsobaRepository
+import com.example.skolskaplikacia.uiStates.blokyTextov
 import com.example.skolskaplikacia.viewModels.LoginViewModel
+import com.example.skolskaplikacia.viewModels.MenuViewModel
 
 enum class Obrazovky() {
     login,
@@ -41,6 +43,7 @@ fun Aplikacia(
     val db = AppDatabaza.getDatabase(appContext)
     val osobaRepository = OsobaRepository(db.osobaDao())
     val loginViewModel: LoginViewModel = viewModel(factory = DatabaseFactory(osobaRepository))
+    val menuViewModel: MenuViewModel = viewModel(factory = DatabaseFactory(osobaRepository))
     val uiState by loginViewModel.uiState.collectAsState()
 
     // Sleduje zmeny userID a riadi navigáciu na základe týchto zmien.
@@ -71,11 +74,10 @@ fun Aplikacia(
         }
         composable(route = Obrazovky.menu.name) {
             MenuScreen(
-                modifier = Modifier
-                    .background(Color(0xFF8ECEC0))
-                    .fillMaxSize(),
-                viewModel = loginViewModel,
-                LogoutBTN = { navController.navigate(Obrazovky.login.name) }
+                modifier = Modifier,
+                loginViewModel = loginViewModel,
+                menuViewModel = menuViewModel
+                //LogoutBTN = { navController.navigate(Obrazovky.login.name) }
             )
         }
     }

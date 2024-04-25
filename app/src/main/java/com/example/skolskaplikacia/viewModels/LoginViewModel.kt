@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.skolskaplikacia.databaza.Osoba
 import com.example.skolskaplikacia.network.LoginData
 import com.example.skolskaplikacia.network.RetrofitClient
+import com.example.skolskaplikacia.network.UserId
 import com.example.skolskaplikacia.repository.OsobaRepository
 import com.example.skolskaplikacia.uiStates.LoginUiState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,8 +43,8 @@ class LoginViewModel(private val osobaRepository: OsobaRepository) : ViewModel()
      * Funkcia na odhlásenie používateľa. Vymaže používateľa z databáze a resetuje stav prihlásenia.
      */
     fun logout() {
+        println("ahoj odhlasujem")
         val currentUserId = uiState.value.userID
-
         viewModelScope.launch {
             osobaRepository.deleteOsoba(Osoba(osobaId = currentUserId))
 
@@ -83,7 +84,8 @@ class LoginViewModel(private val osobaRepository: OsobaRepository) : ViewModel()
             try {
                 val response = RetrofitClient.apiService.loginUser(LoginData(meno, heslo))
                 if (response.result > 0) {
-                    osobaRepository.insertOsoba(Osoba(osobaId = response.result))
+                    val udaje = RetrofitClient.apiService.getUserName(UserId(response.result))
+                    osobaRepository.insertOsoba(Osoba(osobaId = response.result, meno = udaje.meno, priezvisko = udaje.priezvisko))
                     _uiState.update { currentState ->
                         currentState.copy(userID = response.result, userName = meno)
                     }
