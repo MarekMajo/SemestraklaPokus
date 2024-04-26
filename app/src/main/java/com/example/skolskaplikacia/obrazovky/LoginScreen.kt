@@ -72,8 +72,6 @@ fun LoginScreen (
         when (uiState.userID) {
             -2 -> Text(text = "Nepodarilo sa pripojiť k sieti", color = Color.Red)
             -1 -> Text(text = "Nesprávne zadané prihlasovacie údaje", color = Color.Red)
-            0 -> {}
-            else -> LoginBTN()
         }
 
 

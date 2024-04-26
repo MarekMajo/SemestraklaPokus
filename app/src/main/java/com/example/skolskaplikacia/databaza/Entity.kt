@@ -19,10 +19,27 @@ data class Osoba(
     )
 ])
 data class Rozvrh(
-    @PrimaryKey(autoGenerate = true) val rozvrhId: Int,
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val rozvrhId: Int,
     val osobaId: Int,
     val den: Int,
     val blok: Int,
     val predmet: String,
     val ucebna: String
+)
+
+@Entity(tableName = "deti", foreignKeys = [
+    ForeignKey(
+        entity = Osoba::class,
+        parentColumns = arrayOf("osobaId"),
+        childColumns = arrayOf("rodic"),
+        onDelete = ForeignKey.CASCADE
+    )
+])
+data class Deti(
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val rodic: Int,
+    val dietaId: Int,
+    val meno: String,
+    val priezvisko: String
 )

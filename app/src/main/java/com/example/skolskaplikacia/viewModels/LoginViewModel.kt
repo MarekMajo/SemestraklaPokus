@@ -29,14 +29,14 @@ class LoginViewModel(private val osobaRepository: OsobaRepository) : ViewModel()
          * Pri inicializácii kontroluje existenciu prihláseného používateľa v databáze
          * a aktualizuje uiState na základe dostupných údajov.
          */
-        viewModelScope.launch {
-            val existingUser = osobaRepository.jePrihlaseny()
-            if (existingUser != null) {
-                _uiState.update { currentState ->
-                    currentState.copy(userID = existingUser.osobaId)
-                }
-            }
-        }
+       viewModelScope.launch {
+           val existingUser = osobaRepository.jePrihlaseny()
+           if (existingUser != null) {
+               _uiState.update { currentState ->
+                   currentState.copy(userID = existingUser.osobaId)
+               }
+           }
+       }
     }
 
     /**

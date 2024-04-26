@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -23,6 +22,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,7 +46,6 @@ import com.example.skolskaplikacia.repository.RozvrhRepository
 import com.example.skolskaplikacia.uiStates.BlokCasu
 import com.example.skolskaplikacia.uiStates.BlokTextu
 import com.example.skolskaplikacia.uiStates.blokyCasov
-import com.example.skolskaplikacia.uiStates.blokyTextov
 import com.example.skolskaplikacia.viewModels.LoginViewModel
 import com.example.skolskaplikacia.viewModels.MenuViewModel
 
@@ -58,9 +57,11 @@ fun MenuScreen(
 ) {
     val uiStatelogin by loginViewModel.uiState.collectAsState()
     val uiStatemenu by menuViewModel.uiState.collectAsState()
-    menuViewModel.setUsername()
-    val blokyTextov = blokyTextov
-    val blokyCasu = blokyCasov
+
+    LaunchedEffect(uiStatelogin.userID){
+        menuViewModel.setUsername()
+        menuViewModel.LoadData()
+    }
 
     val configuration = LocalConfiguration.current
     val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
@@ -78,14 +79,12 @@ fun MenuScreen(
                 .background(Color(0xFF8ECEC0))
         ) {
             Column {
-                UserNameButton(
+                UzivatelButton(
                     meno = uiStatemenu.meno ?: "",
                     priezvisko = uiStatemenu.priezvisko ?: "",
-                    //meno = "Marek",
-                    //priezvisko = "Tvrdosinský",
                     loginViewModel = loginViewModel
                 )
-                GridOfSquares(blokyCasu, blokyTextov)
+                MenuRozvrh(blokyCasov, uiStatemenu.blokyVDni)
             }
 
         }
@@ -99,30 +98,30 @@ fun MenuScreen(
         ) {
             if (isPortrait) {
                 Row {
-                    ActionButton("Správy", R.drawable.spravy)
+                    NavigacneTlacidla("Správy", R.drawable.spravy)
                     Spacer(Modifier.width(8.dp))
-                    ActionButton("Dochádzka", R.drawable.dochadzka)
+                    NavigacneTlacidla("Dochádzka", R.drawable.dochadzka)
                 }
                 Row {
-                    ActionButton("Známky", R.drawable.znamky)
+                    NavigacneTlacidla("Známky", R.drawable.znamky)
                     Spacer(Modifier.width(8.dp))
-                    ActionButton("Rozvrh", R.drawable.rozvrh)
+                    NavigacneTlacidla("Rozvrh", R.drawable.rozvrh)
                 }
             } else {
                 Row {
-                    ActionButton("Správy", R.drawable.spravy)
+                    NavigacneTlacidla("Správy", R.drawable.spravy)
                     Spacer(Modifier.width(8.dp))
-                    ActionButton("Dochádzka", R.drawable.dochadzka)
-                    ActionButton("Známky", R.drawable.znamky)
+                    NavigacneTlacidla("Dochádzka", R.drawable.dochadzka)
+                    NavigacneTlacidla("Známky", R.drawable.znamky)
                     Spacer(Modifier.width(8.dp))
-                    ActionButton("Rozvrh", R.drawable.rozvrh)
+                    NavigacneTlacidla("Rozvrh", R.drawable.rozvrh)
                 }
             }
         }
     }
 }
 @Composable
-fun UserNameButton(meno: String, priezvisko: String, loginViewModel: LoginViewModel) {
+fun UzivatelButton(meno: String, priezvisko: String, loginViewModel: LoginViewModel) {
     var expanded by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier
@@ -141,13 +140,43 @@ fun UserNameButton(meno: String, priezvisko: String, loginViewModel: LoginViewMo
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
-            DropdownMenuItem(text = { Text(text = "Odhlasiť") }, onClick = { loginViewModel.logout() })
+            DropdownMenuItem(text = { Text(text = "Odhlasiť") }, onClick = {
+                expanded = false
+                loginViewModel.logout()
+            })
         }
     }
 }
 
 @Composable
-fun ActionButton(text: String, image: Int ) {
+fun DetiButton(meno: String, priezvisko: String) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Box(modifier = Modifier
+        .padding(15.dp)
+        .background(Color.White)
+        .border(BorderStroke(1.dp, Color.Black))
+        .padding(5.dp),
+        contentAlignment = Alignment.TopStart
+    ) {
+        Text(
+            text = "",
+            modifier = Modifier.clickable { expanded = true },
+            color = Color.Black
+        )
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            DropdownMenuItem(text = { Text(text = "Odhlasiť") }, onClick = {
+                expanded = false
+            })
+        }
+    }
+}
+
+@Composable
+fun NavigacneTlacidla(text: String, image: Int ) {
     Button(
         modifier = Modifier
             .size(width = 200.dp, height = 200.dp)
@@ -168,7 +197,7 @@ fun ActionButton(text: String, image: Int ) {
 }
 
 @Composable
-fun GridOfSquares(blokyCasov: List<BlokCasu>, blokyTextov: List<BlokTextu>) {
+fun MenuRozvrh(blokyCasov: List<BlokCasu>, blokyTextov: List<BlokTextu>) {
     val velkost = LocalConfiguration.current.screenWidthDp.dp / 7
     Row(
         modifier = Modifier
@@ -215,19 +244,19 @@ fun GridOfSquares(blokyCasov: List<BlokCasu>, blokyTextov: List<BlokTextu>) {
     }
 }
 
-@Preview
-@Composable
-fun Zobraz() {
-    val appContext = LocalContext.current.applicationContext
-    val db = AppDatabaza.getDatabase(appContext)
-    val osobaRepository = OsobaRepository(db.osobaDao())
-    val rozvrhRepository = RozvrhRepository(db.rozvrhDao())
-    val loginViewModel: LoginViewModel = viewModel(factory = DatabaseFactory(osobaRepository,rozvrhRepository))
-    val menuViewModel: MenuViewModel = viewModel(factory = DatabaseFactory(osobaRepository,rozvrhRepository))
-    MenuScreen(
-        modifier = Modifier,
-        loginViewModel = loginViewModel,
-        menuViewModel = menuViewModel
-    )
-
-}
+//@Preview
+//@Composable
+//fun Zobraz() {
+//    val appContext = LocalContext.current.applicationContext
+//    val db = AppDatabaza.getDatabase(appContext)
+//    val osobaRepository = OsobaRepository(db.osobaDao())
+//    val rozvrhRepository = RozvrhRepository(db.rozvrhDao())
+//    val loginViewModel: LoginViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository))
+//    val menuViewModel: MenuViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository))
+//    MenuScreen(
+//        modifier = Modifier,
+//        loginViewModel = loginViewModel,
+//        menuViewModel = menuViewModel
+//    )
+//
+//}

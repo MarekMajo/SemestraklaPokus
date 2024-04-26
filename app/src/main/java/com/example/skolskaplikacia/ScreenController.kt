@@ -3,7 +3,6 @@ package com.example.skolskaplikacia
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -18,9 +17,9 @@ import com.example.skolskaplikacia.databaza.AppDatabaza
 import com.example.skolskaplikacia.obrazovky.LoginScreen
 import com.example.skolskaplikacia.obrazovky.MenuScreen
 import com.example.skolskaplikacia.repository.DatabaseFactory
+import com.example.skolskaplikacia.repository.DetiRepository
 import com.example.skolskaplikacia.repository.OsobaRepository
 import com.example.skolskaplikacia.repository.RozvrhRepository
-import com.example.skolskaplikacia.uiStates.blokyTextov
 import com.example.skolskaplikacia.viewModels.LoginViewModel
 import com.example.skolskaplikacia.viewModels.MenuViewModel
 
@@ -44,20 +43,10 @@ fun Aplikacia(
     val db = AppDatabaza.getDatabase(appContext)
     val osobaRepository = OsobaRepository(db.osobaDao())
     val rozvrhRepository = RozvrhRepository(db.rozvrhDao())
-    val loginViewModel: LoginViewModel = viewModel(factory = DatabaseFactory(osobaRepository,rozvrhRepository))
-    val menuViewModel: MenuViewModel = viewModel(factory = DatabaseFactory(osobaRepository,rozvrhRepository))
+    val detiRepository = DetiRepository(db.detiDao())
+    val loginViewModel: LoginViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository))
+    val menuViewModel: MenuViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository))
     val uiState by loginViewModel.uiState.collectAsState()
-
-    // Sleduje zmeny userID a riadi navigáciu na základe týchto zmien.
-    LaunchedEffect(uiState.userID) {
-        if (uiState.userID > 0) {
-            navController.navigate(Obrazovky.menu.name) {
-                popUpTo(Obrazovky.login.name) { inclusive = true } // Odstráni prihlasovaciu obrazovku zo stacku
-            }
-        } else {
-            navController.navigate(Obrazovky.login.name)
-        }
-    }
 
     // Nastavuje počiatočnú obrazovku založenú na stavu userID
     NavHost(
@@ -79,7 +68,6 @@ fun Aplikacia(
                 modifier = Modifier,
                 loginViewModel = loginViewModel,
                 menuViewModel = menuViewModel
-                //LogoutBTN = { navController.navigate(Obrazovky.login.name) }
             )
         }
     }
