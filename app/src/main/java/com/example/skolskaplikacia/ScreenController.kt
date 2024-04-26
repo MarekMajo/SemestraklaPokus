@@ -19,6 +19,7 @@ import com.example.skolskaplikacia.obrazovky.LoginScreen
 import com.example.skolskaplikacia.obrazovky.MenuScreen
 import com.example.skolskaplikacia.repository.DatabaseFactory
 import com.example.skolskaplikacia.repository.OsobaRepository
+import com.example.skolskaplikacia.repository.RozvrhRepository
 import com.example.skolskaplikacia.uiStates.blokyTextov
 import com.example.skolskaplikacia.viewModels.LoginViewModel
 import com.example.skolskaplikacia.viewModels.MenuViewModel
@@ -42,8 +43,9 @@ fun Aplikacia(
     val appContext = LocalContext.current.applicationContext
     val db = AppDatabaza.getDatabase(appContext)
     val osobaRepository = OsobaRepository(db.osobaDao())
-    val loginViewModel: LoginViewModel = viewModel(factory = DatabaseFactory(osobaRepository))
-    val menuViewModel: MenuViewModel = viewModel(factory = DatabaseFactory(osobaRepository))
+    val rozvrhRepository = RozvrhRepository(db.rozvrhDao())
+    val loginViewModel: LoginViewModel = viewModel(factory = DatabaseFactory(osobaRepository,rozvrhRepository))
+    val menuViewModel: MenuViewModel = viewModel(factory = DatabaseFactory(osobaRepository,rozvrhRepository))
     val uiState by loginViewModel.uiState.collectAsState()
 
     // Sleduje zmeny userID a riadi navigáciu na základe týchto zmien.

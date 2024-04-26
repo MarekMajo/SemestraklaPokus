@@ -42,6 +42,7 @@ import com.example.skolskaplikacia.R
 import com.example.skolskaplikacia.databaza.AppDatabaza
 import com.example.skolskaplikacia.repository.DatabaseFactory
 import com.example.skolskaplikacia.repository.OsobaRepository
+import com.example.skolskaplikacia.repository.RozvrhRepository
 import com.example.skolskaplikacia.uiStates.BlokCasu
 import com.example.skolskaplikacia.uiStates.BlokTextu
 import com.example.skolskaplikacia.uiStates.blokyCasov
@@ -78,10 +79,10 @@ fun MenuScreen(
         ) {
             Column {
                 UserNameButton(
-                    //meno = uiStatemenu.meno ?: "",
-                    //priezvisko = uiStatemenu.priezvisko ?: "",
-                    meno = "Marek",
-                    priezvisko = "Tvrdosinský",
+                    meno = uiStatemenu.meno ?: "",
+                    priezvisko = uiStatemenu.priezvisko ?: "",
+                    //meno = "Marek",
+                    //priezvisko = "Tvrdosinský",
                     loginViewModel = loginViewModel
                 )
                 GridOfSquares(blokyCasu, blokyTextov)
@@ -172,7 +173,7 @@ fun GridOfSquares(blokyCasov: List<BlokCasu>, blokyTextov: List<BlokTextu>) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 5.dp, end = 5.dp, top = 60.dp)
+            .padding(start = 5.dp, end = 5.dp)
     ) {
         for (i in 1..7) {
             val blok = blokyCasov.find { it.id == i } ?: BlokCasu(i, listOf("", ""))
@@ -220,8 +221,9 @@ fun Zobraz() {
     val appContext = LocalContext.current.applicationContext
     val db = AppDatabaza.getDatabase(appContext)
     val osobaRepository = OsobaRepository(db.osobaDao())
-    val loginViewModel: LoginViewModel = viewModel(factory = DatabaseFactory(osobaRepository))
-    val menuViewModel: MenuViewModel = viewModel(factory = DatabaseFactory(osobaRepository))
+    val rozvrhRepository = RozvrhRepository(db.rozvrhDao())
+    val loginViewModel: LoginViewModel = viewModel(factory = DatabaseFactory(osobaRepository,rozvrhRepository))
+    val menuViewModel: MenuViewModel = viewModel(factory = DatabaseFactory(osobaRepository,rozvrhRepository))
     MenuScreen(
         modifier = Modifier,
         loginViewModel = loginViewModel,

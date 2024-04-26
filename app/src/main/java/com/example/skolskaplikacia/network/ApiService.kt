@@ -9,4 +9,7 @@ interface ApiService {
 
     @POST("MobileGetMeno")
     suspend fun getUserName(@Body userId: UserId): UserName
+
+    @POST("MobileGetRozvrh")
+    suspend fun getUserRozvrh(@Body userId: UserId): GetRozvrh
 }

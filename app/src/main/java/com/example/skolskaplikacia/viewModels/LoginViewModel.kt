@@ -43,7 +43,6 @@ class LoginViewModel(private val osobaRepository: OsobaRepository) : ViewModel()
      * Funkcia na odhlásenie používateľa. Vymaže používateľa z databáze a resetuje stav prihlásenia.
      */
     fun logout() {
-        println("ahoj odhlasujem")
         val currentUserId = uiState.value.userID
         viewModelScope.launch {
             osobaRepository.deleteOsoba(Osoba(osobaId = currentUserId))
@@ -85,6 +84,7 @@ class LoginViewModel(private val osobaRepository: OsobaRepository) : ViewModel()
                 val response = RetrofitClient.apiService.loginUser(LoginData(meno, heslo))
                 if (response.result > 0) {
                     val udaje = RetrofitClient.apiService.getUserName(UserId(response.result))
+                    val rozvrh = RetrofitClient.apiService.getUserRozvrh(UserId(response.result))
                     osobaRepository.insertOsoba(Osoba(osobaId = response.result, meno = udaje.meno, priezvisko = udaje.priezvisko))
                     _uiState.update { currentState ->
                         currentState.copy(userID = response.result, userName = meno)

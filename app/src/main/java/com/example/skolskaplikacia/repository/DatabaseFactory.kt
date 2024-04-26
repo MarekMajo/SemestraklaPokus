@@ -6,7 +6,8 @@ import com.example.skolskaplikacia.viewModels.LoginViewModel
 import com.example.skolskaplikacia.viewModels.MenuViewModel
 
 class DatabaseFactory(
-    private val osobaRepository: OsobaRepository
+    private val osobaRepository: OsobaRepository,
+    private val rozvrhRepository: RozvrhRepository
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return when {
@@ -14,7 +15,7 @@ class DatabaseFactory(
                 LoginViewModel(osobaRepository) as T
             }
             modelClass.isAssignableFrom(MenuViewModel::class.java) -> {
-                MenuViewModel(osobaRepository) as T
+                MenuViewModel(osobaRepository, rozvrhRepository) as T
             }
             else -> throw IllegalArgumentException("Unknown ViewModel class")
         }
