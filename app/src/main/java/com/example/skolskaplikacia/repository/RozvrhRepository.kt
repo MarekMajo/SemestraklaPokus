@@ -8,8 +8,8 @@ class RozvrhRepository(private val rozvrhDao: RozvrhDao) {
         rozvrhDao.insertRozvrh(rozvrh)
     }
 
-    suspend fun deleteRozvrh(rozvrh: Rozvrh) {
-        rozvrhDao.deleteRozvrh(rozvrh)
+    suspend fun deleteAllRozvrhy() {
+        rozvrhDao.deleteAllRozvrhy()
     }
 
     suspend fun getAllRozvrh(): List<Rozvrh> {

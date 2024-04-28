@@ -40,11 +40,13 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.skolskaplikacia.R
 import com.example.skolskaplikacia.databaza.AppDatabaza
+import com.example.skolskaplikacia.databaza.Deti
 import com.example.skolskaplikacia.repository.DatabaseFactory
 import com.example.skolskaplikacia.repository.OsobaRepository
 import com.example.skolskaplikacia.repository.RozvrhRepository
 import com.example.skolskaplikacia.uiStates.BlokCasu
 import com.example.skolskaplikacia.uiStates.BlokTextu
+import com.example.skolskaplikacia.uiStates.MenuUiState
 import com.example.skolskaplikacia.uiStates.blokyCasov
 import com.example.skolskaplikacia.viewModels.LoginViewModel
 import com.example.skolskaplikacia.viewModels.MenuViewModel
@@ -79,11 +81,14 @@ fun MenuScreen(
                 .background(Color(0xFF8ECEC0))
         ) {
             Column {
-                UzivatelButton(
-                    meno = uiStatemenu.meno ?: "",
-                    priezvisko = uiStatemenu.priezvisko ?: "",
-                    loginViewModel = loginViewModel
-                )
+                Row {
+                    UzivatelButton(
+                        meno = uiStatemenu.meno ?: "",
+                        priezvisko = uiStatemenu.priezvisko ?: "",
+                        loginViewModel = loginViewModel
+                    )
+                    DetiButton(zoznam = uiStatemenu.zoznamDeti, menuViewModel, uiStatemenu)
+                }
                 MenuRozvrh(blokyCasov, uiStatemenu.blokyVDni)
             }
 
@@ -144,6 +149,49 @@ fun UzivatelButton(meno: String, priezvisko: String, loginViewModel: LoginViewMo
                 expanded = false
                 loginViewModel.logout()
             })
+        }
+    }
+}
+
+@Composable
+fun DetiButton(zoznam: List<Deti>, menuViewModel: MenuViewModel , uiStatemenu: MenuUiState) {
+    var expanded by remember { mutableStateOf(false) }
+    if (zoznam.isNotEmpty()) {
+        Box(
+            modifier = Modifier
+                .padding(15.dp)
+                .background(Color.White)
+                .border(BorderStroke(1.dp, Color.Black))
+                .padding(5.dp),
+            contentAlignment = Alignment.TopEnd
+        ) {
+            for (item in zoznam) {
+                if (item.dietaId == uiStatemenu.selectUser) {
+                    Text(
+                        text = "${item.meno} ${item.priezvisko}",
+                        modifier = Modifier.clickable { expanded = true },
+                        color = Color.Black
+                    )
+                }
+            }
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                for (item in zoznam) {
+                    if (item.dietaId != uiStatemenu.selectUser)
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = "${item.meno} ${item.priezvisko}"
+                                )
+                            },
+                            onClick = {
+                                expanded = false
+                                menuViewModel.ChangeSelectUser(item.dietaId)
+                            })
+                }
+            }
         }
     }
 }

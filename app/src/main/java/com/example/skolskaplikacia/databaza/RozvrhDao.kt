@@ -16,6 +16,9 @@ interface RozvrhDao {
     @Query("SELECT * FROM rozvrh")
     suspend fun getAllRozvrhy(): List<Rozvrh>
 
+    @Query("delete from rozvrh")
+    suspend fun deleteAllRozvrhy()
+
     @Query("SELECT * FROM rozvrh where osobaId = :id")
     suspend fun getRozvrhOsoby(id: Int): List<Rozvrh>
 

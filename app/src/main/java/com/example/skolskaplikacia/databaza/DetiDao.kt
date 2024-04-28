@@ -10,5 +10,5 @@ interface DetiDao {
     suspend fun insertDieta(dieta: Deti)
 
     @Query("SELECT * FROM deti")
-    suspend fun getDeit(): List<Deti>
+    suspend fun getAllDeti(): List<Deti>
 }

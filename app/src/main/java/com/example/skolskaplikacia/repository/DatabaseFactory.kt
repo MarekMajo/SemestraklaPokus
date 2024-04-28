@@ -13,7 +13,7 @@ class DatabaseFactory(
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return when {
             modelClass.isAssignableFrom(LoginViewModel::class.java) -> {
-                LoginViewModel(osobaRepository) as T
+                LoginViewModel(osobaRepository, rozvrhRepository, detiRepository) as T
             }
             modelClass.isAssignableFrom(MenuViewModel::class.java) -> {
                 MenuViewModel(osobaRepository, rozvrhRepository, detiRepository) as T

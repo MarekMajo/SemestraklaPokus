@@ -1,10 +1,13 @@
 package com.example.skolskaplikacia.uiStates
 
+import com.example.skolskaplikacia.databaza.Deti
+
 data class MenuUiState(
     val meno: String?,
     val priezvisko: String?,
-    val isDropdownVisible: Boolean = false,
-    val blokyVDni: List<BlokTextu>
+    val selectUser: Int,
+    val blokyVDni: List<BlokTextu>,
+    val zoznamDeti: List<Deti>
 )
 
 data class BlokCasu(

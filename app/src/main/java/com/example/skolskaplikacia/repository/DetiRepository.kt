@@ -5,7 +5,12 @@ import com.example.skolskaplikacia.databaza.DetiDao
 
 class DetiRepository(private val detiDao: DetiDao) {
 
-    suspend fun insertOsoba(dieta: Deti) {
+    suspend fun insertDieta(dieta: Deti) {
         detiDao.insertDieta(dieta)
     }
+
+    suspend fun getAllDeti(): List <Deti> {
+        return detiDao.getAllDeti()
+    }
+
 }

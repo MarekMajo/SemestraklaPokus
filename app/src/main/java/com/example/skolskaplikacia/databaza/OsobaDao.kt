@@ -7,7 +7,7 @@ import androidx.room.Query
 @Dao
 interface OsobaDao {
     @Insert
-    suspend fun insertOsoba(osoba: Osoba)
+    suspend fun insertOsoba(osoba: Osoba) : Long
 
     @Delete
     suspend fun deleteOsoba(osoba: Osoba)
