@@ -14,20 +14,35 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.skolskaplikacia.databaza.AppDatabaza
+import com.example.skolskaplikacia.obrazovky.DochadzkaScreen
 import com.example.skolskaplikacia.obrazovky.LoginScreen
 import com.example.skolskaplikacia.obrazovky.MenuScreen
+import com.example.skolskaplikacia.obrazovky.RozsireneZnamkyScreen
+import com.example.skolskaplikacia.obrazovky.RozvrhScreen
+import com.example.skolskaplikacia.obrazovky.SpravyScreen
+import com.example.skolskaplikacia.obrazovky.ZnamkyScreen
 import com.example.skolskaplikacia.repository.DatabaseFactory
 import com.example.skolskaplikacia.repository.DetiRepository
 import com.example.skolskaplikacia.repository.OsobaRepository
 import com.example.skolskaplikacia.repository.RozvrhRepository
+import com.example.skolskaplikacia.viewModels.DochadzkaViewModel
 import com.example.skolskaplikacia.viewModels.LoginViewModel
 import com.example.skolskaplikacia.viewModels.MenuViewModel
+import com.example.skolskaplikacia.viewModels.RozsireneZnamkyViewModel
+import com.example.skolskaplikacia.viewModels.RozvrhViewModel
+import com.example.skolskaplikacia.viewModels.SpravyViewModel
+import com.example.skolskaplikacia.viewModels.ZnamkyViewModel
 
-enum class Obrazovky() {
+enum class Obrazovky {
     login,
     menu,
-    znamky
+    správy,
+    dochádzka,
+    známky,
+    rozsirene,
+    rozvrh
 }
+
 
 /**
  * Hlavná composable funkcia, ktorá riadi navigáciu a zobrazenie hlavných obrazoviek aplikácie.
@@ -46,9 +61,13 @@ fun Aplikacia(
     val detiRepository = DetiRepository(db.detiDao())
     val loginViewModel: LoginViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository))
     val menuViewModel: MenuViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository))
+    val spravyViewModel: SpravyViewModel = viewModel()
+    val rozvrhViewModel: RozvrhViewModel = viewModel()
+    val dochadzkaViewModel: DochadzkaViewModel = viewModel()
+    val znamkyViewModel: ZnamkyViewModel = viewModel()
+    val rozsireneZnamkyViewModel: RozsireneZnamkyViewModel = viewModel()
     val uiState by loginViewModel.uiState.collectAsState()
 
-    // Nastavuje počiatočnú obrazovku založenú na stavu userID
     NavHost(
         navController = navController,
         startDestination = if (uiState.userID > 0) Obrazovky.menu.name else Obrazovky.login.name,
@@ -66,8 +85,44 @@ fun Aplikacia(
         composable(route = Obrazovky.menu.name) {
             MenuScreen(
                 modifier = Modifier,
+                navController = navController,
                 loginViewModel = loginViewModel,
                 menuViewModel = menuViewModel
+            )
+        }
+        composable(route = Obrazovky.správy.name) {
+            SpravyScreen(
+                modifier = Modifier,
+                spravyViewModel = spravyViewModel,
+                BackButton = {navController.popBackStack(Obrazovky.menu.name, inclusive = false)}
+            )
+        }
+        composable(route = Obrazovky.rozvrh.name) {
+            RozvrhScreen(
+                modifier = Modifier,
+                rozvrhViewModel = rozvrhViewModel,
+                BackButton = {navController.popBackStack(Obrazovky.menu.name, inclusive = false)}
+            )
+        }
+        composable(route = Obrazovky.dochádzka.name) {
+            DochadzkaScreen(
+                modifier = Modifier,
+                dochadzkaViewModel = dochadzkaViewModel,
+                BackButton = {navController.popBackStack(Obrazovky.menu.name, inclusive = false)}
+            )
+        }
+        composable(route = Obrazovky.známky.name) {
+            ZnamkyScreen(
+                modifier = Modifier,
+                znamkyViewModel = znamkyViewModel,
+                navController = navController
+            )
+        }
+        composable(route = Obrazovky.rozsirene.name) {
+            RozsireneZnamkyScreen(
+                modifier = Modifier,
+                rozsireneZnamkyViewModel = rozsireneZnamkyViewModel,
+                navController = navController
             )
         }
     }

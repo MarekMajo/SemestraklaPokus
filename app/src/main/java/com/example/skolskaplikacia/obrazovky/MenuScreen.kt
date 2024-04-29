@@ -33,17 +33,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import com.example.skolskaplikacia.Obrazovky
 import com.example.skolskaplikacia.R
-import com.example.skolskaplikacia.databaza.AppDatabaza
 import com.example.skolskaplikacia.databaza.Deti
-import com.example.skolskaplikacia.repository.DatabaseFactory
-import com.example.skolskaplikacia.repository.OsobaRepository
-import com.example.skolskaplikacia.repository.RozvrhRepository
 import com.example.skolskaplikacia.uiStates.BlokCasu
 import com.example.skolskaplikacia.uiStates.BlokTextu
 import com.example.skolskaplikacia.uiStates.MenuUiState
@@ -51,9 +46,11 @@ import com.example.skolskaplikacia.uiStates.blokyCasov
 import com.example.skolskaplikacia.viewModels.LoginViewModel
 import com.example.skolskaplikacia.viewModels.MenuViewModel
 
+
 @Composable
 fun MenuScreen(
     modifier: Modifier = Modifier,
+    navController: NavController,
     loginViewModel: LoginViewModel,
     menuViewModel: MenuViewModel
 ) {
@@ -103,23 +100,23 @@ fun MenuScreen(
         ) {
             if (isPortrait) {
                 Row {
-                    NavigacneTlacidla("Správy", R.drawable.spravy)
+                    NavigacneTlacidla("Správy", R.drawable.spravy, navController)
                     Spacer(Modifier.width(8.dp))
-                    NavigacneTlacidla("Dochádzka", R.drawable.dochadzka)
+                    NavigacneTlacidla("Dochádzka", R.drawable.dochadzka, navController)
                 }
                 Row {
-                    NavigacneTlacidla("Známky", R.drawable.znamky)
+                    NavigacneTlacidla("Známky", R.drawable.znamky, navController)
                     Spacer(Modifier.width(8.dp))
-                    NavigacneTlacidla("Rozvrh", R.drawable.rozvrh)
+                    NavigacneTlacidla("Rozvrh", R.drawable.rozvrh, navController)
                 }
             } else {
                 Row {
-                    NavigacneTlacidla("Správy", R.drawable.spravy)
+                    NavigacneTlacidla("Správy", R.drawable.spravy, navController)
                     Spacer(Modifier.width(8.dp))
-                    NavigacneTlacidla("Dochádzka", R.drawable.dochadzka)
-                    NavigacneTlacidla("Známky", R.drawable.znamky)
+                    NavigacneTlacidla("Dochádzka", R.drawable.dochadzka, navController)
+                    NavigacneTlacidla("Známky", R.drawable.znamky, navController)
                     Spacer(Modifier.width(8.dp))
-                    NavigacneTlacidla("Rozvrh", R.drawable.rozvrh)
+                    NavigacneTlacidla("Rozvrh", R.drawable.rozvrh, navController)
                 }
             }
         }
@@ -224,25 +221,24 @@ fun DetiButton(meno: String, priezvisko: String) {
 }
 
 @Composable
-fun NavigacneTlacidla(text: String, image: Int ) {
+fun NavigacneTlacidla(text: String, image: Int, navController: NavController) {
     Button(
         modifier = Modifier
             .size(width = 200.dp, height = 200.dp)
-            .padding(5.dp)
-        ,
+            .padding(5.dp),
         shape = RectangleShape,
         colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black),
-        onClick = { println("Stlačené tlačidlo" + text) }) {
-        Image(painter = painterResource(
-            id = image),
-            contentDescription = null,
-            modifier = Modifier
-                .width(50.dp)
-        )
+        onClick = {
+            navController.navigate(Obrazovky.valueOf(text.toLowerCase()).name)
+        }
+    ) {
+        Image(painter = painterResource(id = image), contentDescription = null, modifier = Modifier.width(50.dp))
         Spacer(Modifier.width(5.dp))
         Text(text = text)
     }
 }
+
+
 
 @Composable
 fun MenuRozvrh(blokyCasov: List<BlokCasu>, blokyTextov: List<BlokTextu>) {
