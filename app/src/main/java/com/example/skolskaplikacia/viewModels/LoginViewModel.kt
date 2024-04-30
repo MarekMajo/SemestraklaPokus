@@ -12,6 +12,7 @@ import com.example.skolskaplikacia.repository.DetiRepository
 import com.example.skolskaplikacia.repository.OsobaRepository
 import com.example.skolskaplikacia.repository.RozvrhRepository
 import com.example.skolskaplikacia.repository.SpravyRepository
+import com.example.skolskaplikacia.repository.ZnamkyRepository
 import com.example.skolskaplikacia.uiStates.LoginUiState
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,7 +31,8 @@ class LoginViewModel(
     private val osobaRepository: OsobaRepository,
     private val rozvrhRepository: RozvrhRepository,
     private val detiRepository: DetiRepository,
-    private val spravyRepository: SpravyRepository
+    private val spravyRepository: SpravyRepository,
+    private val znamkyRepository: ZnamkyRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(LoginUiState(userID = 0, userName = "", userPassword = ""))
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
@@ -59,6 +61,7 @@ class LoginViewModel(
             async { osobaRepository.deleteOsoba(Osoba(osobaId = currentUserId)) }
             async { rozvrhRepository.deleteAllRozvrhy() }
             async { spravyRepository.deleteAllSprava() }
+            async { znamkyRepository.deleteAllPredmety() }
             _uiState.update { currentState ->
                 currentState.copy(userID = 0, userName = "", userPassword = "")
             }

@@ -1,7 +1,5 @@
 package com.example.skolskaplikacia.network
 
-import java.time.DateTimeException
-
 data class LoginData(val username: String, val password: String)
 data class LoginResponse(val result: Int)
 
@@ -13,6 +11,8 @@ data class GetRozvrh(val list: List<RozvrhTuple>)
 data class GetDeti(val list: List<DetiTuple>)
 
 data class GetSpravy(val list: List<SpravyTuple>)
+
+data class GetZnamky(val list: List<ZnamkyTuple>)
 
 data class RozvrhTuple(
     val rozvrhId: Int,
@@ -37,3 +37,20 @@ data class SpravyTuple(
     val cas: String
 )
 
+data class ZnamkyTuple(
+    val predmet: String,
+    val kategorie: List<KategorieTuple>
+)
+data class KategorieTuple(
+    val kategoriaNazov: String,
+    val kategoria_id: Int,
+    val typ_znamky: String,
+    val vaha: String,
+    val max_body: Double?,
+    val znamkyPodpis: List<Znamka>,
+    val znamkyNePodpis: List<Znamka>
+)
+data class Znamka(
+    val znamka: String,
+    val znamkaId: Int
+)

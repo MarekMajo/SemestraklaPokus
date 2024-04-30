@@ -26,6 +26,7 @@ import com.example.skolskaplikacia.repository.DetiRepository
 import com.example.skolskaplikacia.repository.OsobaRepository
 import com.example.skolskaplikacia.repository.RozvrhRepository
 import com.example.skolskaplikacia.repository.SpravyRepository
+import com.example.skolskaplikacia.repository.ZnamkyRepository
 import com.example.skolskaplikacia.viewModels.DochadzkaViewModel
 import com.example.skolskaplikacia.viewModels.LoginViewModel
 import com.example.skolskaplikacia.viewModels.MenuViewModel
@@ -61,12 +62,13 @@ fun Aplikacia(
     val rozvrhRepository = RozvrhRepository(db.rozvrhDao())
     val detiRepository = DetiRepository(db.detiDao())
     val spravyRepository = SpravyRepository(db.spravyDao())
-    val loginViewModel: LoginViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository, spravyRepository))
-    val menuViewModel: MenuViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository, spravyRepository))
-    val spravyViewModel: SpravyViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository, spravyRepository))
+    val znamkyRepository = ZnamkyRepository(db.znamkyDao())
+    val loginViewModel: LoginViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository, spravyRepository, znamkyRepository))
+    val menuViewModel: MenuViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository, spravyRepository, znamkyRepository))
+    val spravyViewModel: SpravyViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository, spravyRepository, znamkyRepository))
     val rozvrhViewModel: RozvrhViewModel = viewModel()
     val dochadzkaViewModel: DochadzkaViewModel = viewModel()
-    val znamkyViewModel: ZnamkyViewModel = viewModel()
+    val znamkyViewModel: ZnamkyViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository, spravyRepository, znamkyRepository))
     val rozsireneZnamkyViewModel: RozsireneZnamkyViewModel = viewModel()
     val uiState by loginViewModel.uiState.collectAsState()
 

@@ -47,3 +47,44 @@ data class Spravy(
     val cas: String,
     val sprava: String?,
 )
+
+@Entity(tableName = "predmety")
+data class Predmety(
+    @PrimaryKey(autoGenerate = true) val predmetId: Int = 0,
+    val osobaId: Int,
+    val predmet: String
+)
+
+@Entity(tableName = "kategorie", foreignKeys = [
+    ForeignKey(
+        entity = Predmety::class,
+        parentColumns = arrayOf("predmetId"),
+        childColumns = arrayOf("predmetId"),
+        onDelete = ForeignKey.CASCADE
+    )
+])
+data class Kategorie(
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val predmetId: Int,
+    val kategoriaId: Int,
+    val nazov: String,
+    val vaha: String,
+    val max_body: Double?,
+)
+
+@Entity(tableName = "znamky", foreignKeys = [
+    ForeignKey(
+        entity = Kategorie::class,
+        parentColumns = arrayOf("id"),
+        childColumns = arrayOf("kategoriaId"),
+        onDelete = ForeignKey.CASCADE
+    )
+])
+data class Znamky(
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val kategoriaId: Int,
+    val znamka: String,
+    val podpis: Int
+)
+
+
