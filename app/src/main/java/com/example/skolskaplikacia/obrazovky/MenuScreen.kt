@@ -56,10 +56,14 @@ fun MenuScreen(
 ) {
     val uiStatelogin by loginViewModel.uiState.collectAsState()
     val uiStatemenu by menuViewModel.uiState.collectAsState()
-
-    LaunchedEffect(uiStatelogin.userID){
-        menuViewModel.setUsername()
-        menuViewModel.LoadData()
+    LaunchedEffect(uiStatelogin.userID) {
+        if (uiStatelogin.userID > 0) {
+            menuViewModel.setUsername()
+            menuViewModel.LoadData()
+        } else if (uiStatelogin.userID == 0) {
+            menuViewModel.LoadData()
+            menuViewModel.PovolReaload(true)
+        }
     }
 
     val configuration = LocalConfiguration.current
@@ -70,12 +74,14 @@ fun MenuScreen(
         prvaCast = 0.5F
         druhaCast = 0.5F
     }
+
     Column(modifier = modifier.fillMaxSize()) {
         Box(
             modifier = Modifier
                 .weight(prvaCast)
                 .fillMaxWidth()
                 .background(Color(0xFF8ECEC0))
+
         ) {
             Column {
                 Row {
@@ -189,33 +195,6 @@ fun DetiButton(zoznam: List<Deti>, menuViewModel: MenuViewModel , uiStatemenu: M
                             })
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun DetiButton(meno: String, priezvisko: String) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Box(modifier = Modifier
-        .padding(15.dp)
-        .background(Color.White)
-        .border(BorderStroke(1.dp, Color.Black))
-        .padding(5.dp),
-        contentAlignment = Alignment.TopStart
-    ) {
-        Text(
-            text = "",
-            modifier = Modifier.clickable { expanded = true },
-            color = Color.Black
-        )
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            DropdownMenuItem(text = { Text(text = "Odhlasiť") }, onClick = {
-                expanded = false
-            })
         }
     }
 }

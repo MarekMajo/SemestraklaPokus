@@ -11,7 +11,9 @@ import com.example.skolskaplikacia.network.UserId
 import com.example.skolskaplikacia.repository.DetiRepository
 import com.example.skolskaplikacia.repository.OsobaRepository
 import com.example.skolskaplikacia.repository.RozvrhRepository
+import com.example.skolskaplikacia.repository.SpravyRepository
 import com.example.skolskaplikacia.uiStates.LoginUiState
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -27,7 +29,8 @@ import kotlinx.coroutines.flow.asStateFlow
 class LoginViewModel(
     private val osobaRepository: OsobaRepository,
     private val rozvrhRepository: RozvrhRepository,
-    private val detiRepository: DetiRepository
+    private val detiRepository: DetiRepository,
+    private val spravyRepository: SpravyRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(LoginUiState(userID = 0, userName = "", userPassword = ""))
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
@@ -53,8 +56,9 @@ class LoginViewModel(
     fun logout() {
         val currentUserId = uiState.value.userID
         viewModelScope.launch {
-            osobaRepository.deleteOsoba(Osoba(osobaId = currentUserId))
-            rozvrhRepository.deleteAllRozvrhy()
+            async { osobaRepository.deleteOsoba(Osoba(osobaId = currentUserId)) }
+            async { rozvrhRepository.deleteAllRozvrhy() }
+            async { spravyRepository.deleteAllSprava() }
             _uiState.update { currentState ->
                 currentState.copy(userID = 0, userName = "", userPassword = "")
             }

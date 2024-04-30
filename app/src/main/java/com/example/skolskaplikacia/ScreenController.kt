@@ -25,6 +25,7 @@ import com.example.skolskaplikacia.repository.DatabaseFactory
 import com.example.skolskaplikacia.repository.DetiRepository
 import com.example.skolskaplikacia.repository.OsobaRepository
 import com.example.skolskaplikacia.repository.RozvrhRepository
+import com.example.skolskaplikacia.repository.SpravyRepository
 import com.example.skolskaplikacia.viewModels.DochadzkaViewModel
 import com.example.skolskaplikacia.viewModels.LoginViewModel
 import com.example.skolskaplikacia.viewModels.MenuViewModel
@@ -59,9 +60,10 @@ fun Aplikacia(
     val osobaRepository = OsobaRepository(db.osobaDao())
     val rozvrhRepository = RozvrhRepository(db.rozvrhDao())
     val detiRepository = DetiRepository(db.detiDao())
-    val loginViewModel: LoginViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository))
-    val menuViewModel: MenuViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository))
-    val spravyViewModel: SpravyViewModel = viewModel()
+    val spravyRepository = SpravyRepository(db.spravyDao())
+    val loginViewModel: LoginViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository, spravyRepository))
+    val menuViewModel: MenuViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository, spravyRepository))
+    val spravyViewModel: SpravyViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository, spravyRepository))
     val rozvrhViewModel: RozvrhViewModel = viewModel()
     val dochadzkaViewModel: DochadzkaViewModel = viewModel()
     val znamkyViewModel: ZnamkyViewModel = viewModel()
@@ -78,8 +80,7 @@ fun Aplikacia(
                 modifier = Modifier
                     .background(Color(0xFF8ECEC0))
                     .fillMaxSize(),
-                viewModel = loginViewModel,
-                LoginBTN = { navController.navigate(Obrazovky.menu.name)}
+                viewModel = loginViewModel
             )
         }
         composable(route = Obrazovky.menu.name) {
@@ -93,6 +94,7 @@ fun Aplikacia(
         composable(route = Obrazovky.správy.name) {
             SpravyScreen(
                 modifier = Modifier,
+                menuViewModel = menuViewModel,
                 spravyViewModel = spravyViewModel,
                 BackButton = {navController.popBackStack(Obrazovky.menu.name, inclusive = false)}
             )

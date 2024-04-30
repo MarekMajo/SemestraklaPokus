@@ -3,14 +3,18 @@
     import androidx.lifecycle.ViewModel
     import androidx.lifecycle.viewModelScope
     import com.example.skolskaplikacia.databaza.Rozvrh
+    import com.example.skolskaplikacia.databaza.Spravy
     import com.example.skolskaplikacia.network.RetrofitClient
     import com.example.skolskaplikacia.network.RozvrhTuple
+    import com.example.skolskaplikacia.network.SpravyTuple
     import com.example.skolskaplikacia.network.UserId
     import com.example.skolskaplikacia.repository.DetiRepository
     import com.example.skolskaplikacia.repository.OsobaRepository
     import com.example.skolskaplikacia.repository.RozvrhRepository
+    import com.example.skolskaplikacia.repository.SpravyRepository
     import com.example.skolskaplikacia.uiStates.BlokTextu
     import com.example.skolskaplikacia.uiStates.MenuUiState
+    import kotlinx.coroutines.async
     import kotlinx.coroutines.flow.MutableStateFlow
     import kotlinx.coroutines.flow.StateFlow
     import kotlinx.coroutines.flow.asStateFlow
@@ -21,7 +25,8 @@
     class MenuViewModel(
         private val osobaRepository: OsobaRepository,
         private val rozvrhRepository: RozvrhRepository,
-        private val detiRepository: DetiRepository
+        private val detiRepository: DetiRepository,
+        private val spravyRepository: SpravyRepository
     ) : ViewModel() {
         private val _uiState = MutableStateFlow(MenuUiState(meno = "", priezvisko = "",selectUser = 0 , blokyVDni = listOf(), zoznamDeti = listOf()))
         val uiState: StateFlow<MenuUiState> = _uiState.asStateFlow()
@@ -37,6 +42,10 @@
             _uiState.update { currentState ->
                 currentState.copy(blokyVDni = blokyVDni)
             }
+        }
+
+        fun PovolReaload(enable: Boolean) {
+            _uiState.update { it.copy(reload = enable) }
         }
 
         fun setUsername() {
@@ -65,54 +74,97 @@
             }
         }
 
-        fun LoadData() {
-            resetUiState()
+            fun LoadData() {
             viewModelScope.launch {
-                val deti = detiRepository.getAllDeti()
-                if (deti.isNotEmpty()) {
-                    var selectUser = deti.get(0).dietaId
-                    _uiState.update { currentState ->
-                        currentState.copy(selectUser = selectUser, zoznamDeti = deti)
+                if (_uiState.value.reload) {
+                    resetUiState()
+                    _uiState.update { it.copy(reload = false) }
+                    val deti = detiRepository.getAllDeti()
+                    if (deti.isNotEmpty()) {
+                        _uiState.update { currentState ->
+                            currentState.copy(selectUser = deti[0].dietaId, zoznamDeti = deti)
+                        }
+                        setBlokovRozvrhu()
+                        try {
+                            for (item in deti) {
+                                val rozvrhRequest =
+                                    async { RetrofitClient.apiService.getUserRozvrh(UserId(item.dietaId)).list }
+                                val spravyRequest =
+                                    async { RetrofitClient.apiService.MobileGetSpravy(UserId(item.dietaId)).list }
+                                val existujucaDatabazaRequest =
+                                    async { rozvrhRepository.getAllRozvrh() }
+                                val existujuceSpravyRequest =
+                                    async { spravyRepository.getAllSpravy() }
+
+                                val rozvrh = rozvrhRequest.await()
+                                val spravy = spravyRequest.await()
+                                val existujuciRozvrh = existujucaDatabazaRequest.await()
+                                val existujuceSpravy = existujuceSpravyRequest.await()
+
+                                val (toAddSpravy, toDeleteSpravy) = PorovnajSpravy(
+                                    spravy,
+                                    existujuceSpravy,
+                                    item.dietaId
+                                )
+                                PridajDoSpravy(toAddSpravy)
+                                OdstranZSpravy(toDeleteSpravy)
+
+                                val (toAddRozrvrh, toDeleteRozvrh, toUpdateRozvrh) = PorovnajDatabazuRozvrh(
+                                    rozvrh,
+                                    existujuciRozvrh,
+                                    item.dietaId
+                                )
+                                PridajDoRozvrhu(toAddRozrvrh)
+                                OdstranZRozvrhu(toDeleteRozvrh)
+                                UpravVRozvrhu(toUpdateRozvrh, item.dietaId)
+
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
                     }
-                    setBlokovRozvrhu()
-                    try {
-                        for (item in deti) {
-                            val response =RetrofitClient.apiService.getUserRozvrh(UserId(item.dietaId)).list
-                            val existujucaDatabaza = rozvrhRepository.getAllRozvrh()
+                    else {
+                        val osoba = osobaRepository.jePrihlaseny()
+                        if (osoba != null) {
+                            _uiState.update { currentState ->
+                                currentState.copy(selectUser = osoba.osobaId)
+                            }
+                            setBlokovRozvrhu()
+                            val rozvrhRequest =
+                                async { RetrofitClient.apiService.getUserRozvrh(UserId(osoba.osobaId)).list }
+                            val spravyRequest =
+                                async { RetrofitClient.apiService.MobileGetSpravy(UserId(osoba.osobaId)).list }
+                            val existujucaDatabazaRequest =
+                                async { rozvrhRepository.getAllRozvrh() }
+                            val existujuceSpravyRequest =
+                                async { spravyRepository.getAllSpravy() }
+
+                            val rozvrh = rozvrhRequest.await()
+                            val spravy = spravyRequest.await()
+                            val existujuciRozvrh = existujucaDatabazaRequest.await()
+                            val existujuceSpravy = existujuceSpravyRequest.await()
+
+                            val (toAddSpravy, toDeleteSpravy) = PorovnajSpravy(
+                                spravy,
+                                existujuceSpravy,
+                                osoba.osobaId
+                            )
+                            PridajDoSpravy(toAddSpravy)
+                            OdstranZSpravy(toDeleteSpravy)
+
                             val (toAdd, toDelete, toUpdate) = PorovnajDatabazuRozvrh(
-                                response,
-                                existujucaDatabaza,
-                                item.dietaId
+                                rozvrh,
+                                existujuciRozvrh,
+                                osoba.osobaId
                             )
                             PridajDoRozvrhu(toAdd)
                             OdstranZRozvrhu(toDelete)
-                            UpravVRozvrhu(toUpdate, item.dietaId)
+                            UpravVRozvrhu(toUpdate, osoba.osobaId)
 
                         }
-                    }  catch (e: Exception) {
-                        e.printStackTrace()
                     }
-                } else {
-                    val osoba = osobaRepository.jePrihlaseny()
-                    if (osoba != null) {
-                        _uiState.update { currentState ->
-                            currentState.copy(selectUser = osoba.osobaId)
-                        }
-                        setBlokovRozvrhu()
-                        val response =RetrofitClient.apiService.getUserRozvrh(UserId(osoba.osobaId)).list
-                        val existujucaDatabaza = rozvrhRepository.getAllRozvrh()
-                        val (toAdd, toDelete, toUpdate) = PorovnajDatabazuRozvrh(
-                            response,
-                            existujucaDatabaza,
-                            osoba.osobaId
-                        )
-                        PridajDoRozvrhu(toAdd)
-                        OdstranZRozvrhu(toDelete)
-                        UpravVRozvrhu(toUpdate, osoba.osobaId)
-
-                    }
+                    setBlokovRozvrhu()
                 }
-                setBlokovRozvrhu()
             }
         }
 
@@ -142,22 +194,14 @@
             return Triple(toAdd, toDelete, toUpdate)
         }
 
-
-
-        //fun PorovnajDatabazuRozvrh(serverRozvrh: List<RozvrhTuple>, dbRozvrh: List<Rozvrh>): Triple<List<RozvrhTuple>, List<Int>, List<RozvrhTuple>> {
-        //    val serverIds = serverRozvrh.map { it.rozvrhId }.toSet()
-        //    val dbIds = dbRozvrh.map { it.rozvrhId }.toSet()
-//
-        //    val toAdd = serverRozvrh.filter { it.rozvrhId !in dbIds }
-        //    val toDelete = dbRozvrh.filter { it.rozvrhId !in serverIds }.map { it.rozvrhId }
-        //    val toUpdate = serverRozvrh.filter { it.rozvrhId in dbIds }.filter { tuple ->
-        //        val dbVersion = dbRozvrh.first { it.rozvrhId == tuple.rozvrhId }
-        //        tuple.den != dbVersion.den || tuple.blok != dbVersion.blok ||
-        //                tuple.predmet != dbVersion.predmet || tuple.trieda != dbVersion.ucebna
-        //    }
-//
-        //    return Triple(toAdd, toDelete, toUpdate)
-        //}
+        fun PorovnajSpravy(serverSpravy: List<SpravyTuple>, dbSpravy: List<Spravy>, osobaId: Int): Pair <List<SpravyTuple>, List<Int>>  {
+            val filteredDbSpravy = dbSpravy.filter { it.osobaId == osobaId }
+            val serverKeys = serverSpravy.map { it.spravaId to it.osobaId }.toSet()
+            val dbKeys = filteredDbSpravy.map { it.spravaId to it.osobaId }.toSet()
+            val toAdd = serverSpravy.filter { (it.spravaId to it.osobaId) !in dbKeys }
+            val toDelete = filteredDbSpravy.filter { (it.spravaId to it.osobaId) !in serverKeys }.map { it.spravaId }
+            return Pair(toAdd, toDelete)
+        }
         suspend fun PridajDoRozvrhu(zoznam: List<RozvrhTuple>){
             for (item in zoznam) {
                 rozvrhRepository.insertRozvrh(Rozvrh(
@@ -184,6 +228,24 @@
                     item.trieda,
                     osobaID
                 )
+            }
+        }
+        suspend fun PridajDoSpravy(zoznam: List<SpravyTuple>){
+            for (item in zoznam) {
+                spravyRepository.insertOsoba(
+                    Spravy(
+                    osobaId = item.osobaId,
+                        cas = item.cas,
+                        datum = item.datum,
+                        sprava = item.sprava,
+                        spravaId = item.spravaId
+                )
+                )
+            }
+        }
+        suspend fun OdstranZSpravy(zoznam: List<Int>){
+            for (item in zoznam) {
+                spravyRepository.deleteSprava(item)
             }
         }
     }

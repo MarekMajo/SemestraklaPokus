@@ -7,7 +7,8 @@ data class MenuUiState(
     val priezvisko: String?,
     val selectUser: Int,
     val blokyVDni: List<BlokTextu>,
-    val zoznamDeti: List<Deti>
+    val zoznamDeti: List<Deti>,
+    val reload: Boolean = true
 )
 
 data class BlokCasu(

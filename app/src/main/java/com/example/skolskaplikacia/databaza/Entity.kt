@@ -10,14 +10,7 @@ data class Osoba(
     val priezvisko: String? = null
 )
 
-//@Entity(tableName = "rozvrh", foreignKeys = [
-//    ForeignKey(
-//        entity = Osoba::class,
-//        parentColumns = arrayOf("osobaId"),
-//        childColumns = arrayOf("osobaId"),
-//        onDelete = ForeignKey.CASCADE
-//    )
-//])
+
 @Entity(tableName = "rozvrh")
 data class Rozvrh(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
@@ -43,4 +36,14 @@ data class Deti(
     val dietaId: Int,
     val meno: String,
     val priezvisko: String
+)
+
+@Entity(tableName = "spravy")
+data class Spravy(
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val osobaId: Int,
+    val spravaId: Int,
+    val datum: String,
+    val cas: String,
+    val sprava: String?,
 )

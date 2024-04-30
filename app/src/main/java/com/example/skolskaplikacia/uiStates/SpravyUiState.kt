@@ -1,4 +1,7 @@
 package com.example.skolskaplikacia.uiStates
 
-class SpravyUiState {
-}
+import com.example.skolskaplikacia.databaza.Spravy
+
+data class SpravyUiState(
+    val spravyZoznam: List<Spravy>
+)

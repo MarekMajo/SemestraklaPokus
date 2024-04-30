@@ -32,7 +32,6 @@ import com.example.skolskaplikacia.repository.OsobaRepository
 @Composable
 fun LoginScreen (
     modifier : Modifier = Modifier,
-    LoginBTN: () -> Unit = {},
     viewModel: LoginViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -73,7 +72,5 @@ fun LoginScreen (
             -2 -> Text(text = "Nepodarilo sa pripojiť k sieti", color = Color.Red)
             -1 -> Text(text = "Nesprávne zadané prihlasovacie údaje", color = Color.Red)
         }
-
-
     }
 }
