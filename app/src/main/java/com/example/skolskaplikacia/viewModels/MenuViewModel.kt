@@ -1,5 +1,6 @@
     package com.example.skolskaplikacia.viewModels
 
+    import android.util.Log
     import androidx.lifecycle.ViewModel
     import androidx.lifecycle.viewModelScope
     import com.example.skolskaplikacia.databaza.Kategorie
@@ -11,6 +12,7 @@
     import com.example.skolskaplikacia.network.RozvrhTuple
     import com.example.skolskaplikacia.network.SpravyTuple
     import com.example.skolskaplikacia.network.UserId
+    import com.example.skolskaplikacia.network.ZnamkyTuple
     import com.example.skolskaplikacia.repository.DetiRepository
     import com.example.skolskaplikacia.repository.OsobaRepository
     import com.example.skolskaplikacia.repository.RozvrhRepository
@@ -56,7 +58,7 @@
         fun setUsername() {
             viewModelScope.launch {
                 val osoba = osobaRepository.jePrihlaseny()
-                if (osoba != null) {
+                if (osoba != null && (osoba.meno != _uiState.value.meno || osoba.priezvisko != _uiState.value.priezvisko)) {
                     _uiState.update { currentState ->
                         currentState.copy(
                             meno = osoba.meno,
@@ -66,6 +68,7 @@
                 }
             }
         }
+
 
         fun resetUiState() {
             _uiState.update { currentState ->
@@ -79,7 +82,131 @@
             }
         }
 
-            fun LoadData() {
+        fun LoadData() {
+            viewModelScope.launch {
+                if (_uiState.value.reload) {
+                    resetUiState()
+                    _uiState.update { it.copy(reload = false) }
+                    val (existRozvrh, existSpravy) = DatabaseRequest()
+                    val deti = detiRepository.getAllDeti()
+                    setBlokovRozvrhu()
+                    if (deti.isNotEmpty()) {
+                        _uiState.update { it.copy(selectUser = deti[0].dietaId, zoznamDeti = deti) }
+                        deti.forEach { item ->
+                            val (rozvrh, spravy, znamky) = ServerRequest(item.dietaId)
+                            if (rozvrh.isNotEmpty()) {
+                                val (toAddRozrvrh, toDeleteRozvrh, toUpdateRozvrh) = PorovnajDatabazuRozvrh(rozvrh, existRozvrh, item.dietaId)
+                                PridajDoRozvrhu(toAddRozrvrh)
+                                OdstranZRozvrhu(toDeleteRozvrh)
+                                UpravVRozvrhu(toUpdateRozvrh, item.dietaId)
+                            }
+                            if (spravy.isNotEmpty()) {
+                                val (toAddSpravy, toDeleteSpravy) = PorovnajSpravy(spravy, existSpravy, item.dietaId)
+                                PridajDoSpravy(toAddSpravy)
+                                OdstranZSpravy(toDeleteSpravy)
+                            }
+                            if (znamky.isNotEmpty()) {
+                                znamkyRepository.deletePredmety(item.dietaId)
+                                znamky.forEach { predmet ->
+                                    val predmetId = znamkyRepository.vlozitPredmet(Predmety(predmet = predmet.predmet, osobaId = item.dietaId))
+                                    predmet.kategorie.forEach { kategoria ->
+                                        val kategoriaId = znamkyRepository.vlozitKategoriu(
+                                            Kategorie(predmetId = predmetId.toInt(), kategoriaId = kategoria.kategoria_id,
+                                                max_body = kategoria.max_body, nazov = kategoria.kategoriaNazov, vaha = kategoria.vaha)
+                                        )
+                                        kategoria.znamkyPodpis.forEach { znamka ->
+                                            znamkyRepository.vlozitZnamka(Znamky(kategoriaId = kategoriaId.toInt(), znamka = znamka.znamka, podpis = 1))
+                                        }
+                                        kategoria.znamkyNePodpis.forEach { znamka ->
+                                            znamkyRepository.vlozitZnamka(Znamky(kategoriaId = kategoriaId.toInt(), znamka = znamka.znamka, podpis = 0))
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        val osoba = osobaRepository.jePrihlaseny()
+                        if (osoba != null) {
+                            _uiState.update { it.copy(reload = false, selectUser = osoba.osobaId) }
+                            val (rozvrh, spravy, znamky) = ServerRequest(osoba.osobaId)
+                            if (rozvrh.isNotEmpty()) {
+                                val (toAddRozrvrh, toDeleteRozvrh, toUpdateRozvrh) = PorovnajDatabazuRozvrh(rozvrh, existRozvrh, osoba.osobaId)
+                                PridajDoRozvrhu(toAddRozrvrh)
+                                OdstranZRozvrhu(toDeleteRozvrh)
+                                UpravVRozvrhu(toUpdateRozvrh, osoba.osobaId)
+                            }
+                            if (spravy.isNotEmpty()) {
+                                val (toAddSpravy, toDeleteSpravy) = PorovnajSpravy(spravy, existSpravy, osoba.osobaId)
+                                PridajDoSpravy(toAddSpravy)
+                                OdstranZSpravy(toDeleteSpravy)
+                            }
+                            if (znamky.isNotEmpty()) {
+                                znamkyRepository.deletePredmety(osoba.osobaId)
+                                znamky.forEach { predmet ->
+                                    val predmetId = znamkyRepository.vlozitPredmet(Predmety(predmet = predmet.predmet, osobaId = osoba.osobaId))
+                                    predmet.kategorie.forEach { kategoria ->
+                                        val kategoriaId = znamkyRepository.vlozitKategoriu(
+                                            Kategorie(predmetId = predmetId.toInt(), kategoriaId = kategoria.kategoria_id,
+                                                max_body = kategoria.max_body, nazov = kategoria.kategoriaNazov, vaha = kategoria.vaha)
+                                        )
+                                        kategoria.znamkyPodpis.forEach { znamka ->
+                                            znamkyRepository.vlozitZnamka(Znamky(kategoriaId = kategoriaId.toInt(), znamka = znamka.znamka, podpis = 1))
+                                        }
+                                        kategoria.znamkyNePodpis.forEach { znamka ->
+                                            znamkyRepository.vlozitZnamka(Znamky(kategoriaId = kategoriaId.toInt(), znamka = znamka.znamka, podpis = 0))
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    setBlokovRozvrhu()
+                }
+            }
+        }
+
+        suspend fun ServerRequest(userId: Int):Triple <List<RozvrhTuple>, List<SpravyTuple>, List<ZnamkyTuple>> {
+            val rozvrhDeferred = viewModelScope.async {
+                try {
+                    RetrofitClient.apiService.getUserRozvrh(UserId(userId)).list
+                } catch (e: Exception) {
+                    println("Chyba pri načítaní rozvrhu: ${e.localizedMessage}")
+                    emptyList<RozvrhTuple>()
+                }
+            }
+            val spravyDeferred = viewModelScope.async {
+                try {
+                    RetrofitClient.apiService.MobileGetSpravy(UserId(userId)).list
+                } catch (e: Exception) {
+                    println("Chyba pri načítaní správ: ${e.localizedMessage}")
+                    emptyList<SpravyTuple>()
+                }
+            }
+            val znamkyDeferred = viewModelScope.async {
+                try {
+                    RetrofitClient.apiService.MobileGetZnamky(UserId(userId)).list
+                } catch (e: Exception) {
+                    println("Chyba pri načítaní známok: ${e.localizedMessage}")
+                    emptyList<ZnamkyTuple>()
+                }
+            }
+            val rozvrh = rozvrhDeferred.await()
+            val spravy = spravyDeferred.await()
+            val znamky = znamkyDeferred.await()
+            return Triple(rozvrh, spravy, znamky)
+        }
+
+        suspend fun DatabaseRequest():Pair <List<Rozvrh>, List<Spravy>> {
+            val existujucaDatabazaRequest = viewModelScope.async { rozvrhRepository.getAllRozvrh() }
+            val existujuceSpravyRequest = viewModelScope.async { spravyRepository.getAllSpravy() }
+            val existujuciRozvrh = existujucaDatabazaRequest.await()
+            val existujuceSpravy = existujuceSpravyRequest.await()
+            return Pair(existujuciRozvrh, existujuceSpravy)
+        }
+
+
+
+        fun LoadData2() {
             viewModelScope.launch {
                 if (_uiState.value.reload) {
                     resetUiState()

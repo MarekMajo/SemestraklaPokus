@@ -46,7 +46,9 @@ fun SpravyScreen(
     val configuration = LocalConfiguration.current
     val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
     LaunchedEffect(uiStatemenu.selectUser){
-        spravyViewModel.loadData()
+        if (uiStatemenu.selectUser != uiStatespravy.selectUser) {
+            spravyViewModel.loadData(uiStatemenu.selectUser)
+        }
     }
     var prvaCast = 0.05F
     var druhaCast = 0.95F
@@ -86,7 +88,7 @@ fun SpravyScreen(
             }
 
         }
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .weight(druhaCast)
                 .fillMaxWidth()
@@ -94,15 +96,9 @@ fun SpravyScreen(
             verticalArrangement = Arrangement.SpaceEvenly,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            LazyColumn {
-                items(uiStatespravy.spravyZoznam) { sprava ->
-                    if (sprava.osobaId == uiStatemenu.selectUser) {
-                        SpravaComponent(sprava.datum, sprava.cas, sprava.sprava)
-                    }
-                }
-
+            items(uiStatespravy.spravyZoznam) { sprava ->
+                SpravaComponent(sprava.datum, sprava.cas, sprava.sprava)
             }
-
         }
     }
 }

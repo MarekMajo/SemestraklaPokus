@@ -16,4 +16,7 @@ class SpravyRepository(private val spravyDao: SpravyDao) {
     suspend fun getAllSpravy(): List<Spravy> {
         return spravyDao.getAllSpravy()
     }
+    suspend fun getUserSpravy(id: Int): List<Spravy> {
+        return spravyDao.getUserSpravy(id)
+    }
 }

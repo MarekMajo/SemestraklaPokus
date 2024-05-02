@@ -66,7 +66,7 @@ fun Aplikacia(
     val loginViewModel: LoginViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository, spravyRepository, znamkyRepository))
     val menuViewModel: MenuViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository, spravyRepository, znamkyRepository))
     val spravyViewModel: SpravyViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository, spravyRepository, znamkyRepository))
-    val rozvrhViewModel: RozvrhViewModel = viewModel()
+    val rozvrhViewModel: RozvrhViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository, spravyRepository, znamkyRepository))
     val dochadzkaViewModel: DochadzkaViewModel = viewModel()
     val znamkyViewModel: ZnamkyViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository, spravyRepository, znamkyRepository))
     val rozsireneZnamkyViewModel: RozsireneZnamkyViewModel = viewModel()
@@ -104,6 +104,7 @@ fun Aplikacia(
         composable(route = Obrazovky.rozvrh.name) {
             RozvrhScreen(
                 modifier = Modifier,
+                menuViewModel = menuViewModel,
                 rozvrhViewModel = rozvrhViewModel,
                 BackButton = {navController.popBackStack(Obrazovky.menu.name, inclusive = false)}
             )
