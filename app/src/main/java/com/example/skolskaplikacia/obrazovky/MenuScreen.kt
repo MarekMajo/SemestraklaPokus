@@ -90,6 +90,7 @@ fun MenuScreen(
                         priezvisko = uiStatemenu.priezvisko ?: "",
                         loginViewModel = loginViewModel
                     )
+                    Spacer(modifier = Modifier.weight(1f))
                     DetiButton(zoznam = uiStatemenu.zoznamDeti, menuViewModel, uiStatemenu)
                 }
                 MenuRozvrh(blokyCasov, uiStatemenu.blokyVDni)
@@ -266,20 +267,3 @@ fun MenuRozvrh(blokyCasov: List<BlokCasu>, blokyTextov: List<BlokTextu>) {
         }
     }
 }
-
-//@Preview
-//@Composable
-//fun Zobraz() {
-//    val appContext = LocalContext.current.applicationContext
-//    val db = AppDatabaza.getDatabase(appContext)
-//    val osobaRepository = OsobaRepository(db.osobaDao())
-//    val rozvrhRepository = RozvrhRepository(db.rozvrhDao())
-//    val loginViewModel: LoginViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository))
-//    val menuViewModel: MenuViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository))
-//    MenuScreen(
-//        modifier = Modifier,
-//        loginViewModel = loginViewModel,
-//        menuViewModel = menuViewModel
-//    )
-//
-//}
