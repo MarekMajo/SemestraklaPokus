@@ -21,4 +21,7 @@ interface ApiService {
 
     @POST("MobileGetZnamky")
     suspend fun MobileGetZnamky(@Body userId: UserId): GetZnamky
+
+    @POST("MobileGetRozsahZnamok")
+    suspend fun MobileGetRozsahZnamok(@Body kategorieAllid: List<Int>): KategorieAllid
 }

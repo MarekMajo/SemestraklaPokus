@@ -64,18 +64,34 @@ data class Predmety(
     )
 ])
 data class Kategorie(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    @PrimaryKey(autoGenerate = true) val kategoriaId: Int,
     val predmetId: Int,
-    val kategoriaId: Int,
+    val typ: String,
     val nazov: String,
     val vaha: String,
     val max_body: Double?,
 )
 
+@Entity(tableName = "znamkaNaPrepocet", foreignKeys = [
+    ForeignKey(
+        entity = Kategorie::class,
+        parentColumns = arrayOf("kategoriaId"),
+        childColumns = arrayOf("kategoriaId"),
+        onDelete = ForeignKey.CASCADE
+    )
+])
+data class ZnamkaNaPrepocet(
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val kategoriaId: Int,
+    val rozsah_od: Int,
+    val rozsah_do: Int,
+    val znamka: Int
+)
+
 @Entity(tableName = "znamky", foreignKeys = [
     ForeignKey(
         entity = Kategorie::class,
-        parentColumns = arrayOf("id"),
+        parentColumns = arrayOf("kategoriaId"),
         childColumns = arrayOf("kategoriaId"),
         onDelete = ForeignKey.CASCADE
     )
@@ -83,7 +99,7 @@ data class Kategorie(
 data class Znamky(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val kategoriaId: Int,
-    val znamka: String,
+    val znamka: Int,
     val podpis: Int
 )
 

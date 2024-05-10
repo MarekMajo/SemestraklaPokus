@@ -14,6 +14,15 @@ data class GetSpravy(val list: List<SpravyTuple>)
 
 data class GetZnamky(val list: List<ZnamkyTuple>)
 
+data class KategorieAllid(val list: List<kategorieZnamky>)
+
+data class kategorieZnamky(
+    val kategoria_id: Int,
+    val znamka: Int,
+    val znamka_od: Int,
+    val znamka_do: Int
+)
+
 data class RozvrhTuple(
     val rozvrhId: Int,
     val osobaId: Int,
@@ -51,6 +60,6 @@ data class KategorieTuple(
     val znamkyNePodpis: List<Znamka>
 )
 data class Znamka(
-    val znamka: String,
+    val znamka: Int,
     val znamkaId: Int
 )
