@@ -3,6 +3,9 @@ package com.example.skolskaplikacia.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.room.util.foreignKeyCheck
+import com.example.skolskaplikacia.network.PoziadavkyNaPodpisZnamok
+import com.example.skolskaplikacia.network.RetrofitClient
+import com.example.skolskaplikacia.network.UserId
 import com.example.skolskaplikacia.repository.ZnamkyRepository
 import com.example.skolskaplikacia.uiStates.Kategorie
 import com.example.skolskaplikacia.uiStates.RozsireneZnamkyUiState
@@ -16,7 +19,7 @@ import kotlinx.coroutines.launch
 class RozsireneZnamkyViewModel (
     private val znamkyRepository: ZnamkyRepository
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(RozsireneZnamkyUiState(predmetId = 0, nazovPredmetu = "", zoznamKategorii = listOf(), priemer = ""))
+    private val _uiState = MutableStateFlow(RozsireneZnamkyUiState(predmetId = 0, nazovPredmetu = "", zoznamKategorii = listOf(), priemer = "", userId = 0))
     val uiState: StateFlow<RozsireneZnamkyUiState> = _uiState.asStateFlow()
 
     fun loadData(predmetId: Int) {
@@ -66,13 +69,26 @@ class RozsireneZnamkyViewModel (
             val priemerPredmetu = if (zoznamKategorii.isNotEmpty()) {
                 zoznamKategorii.sumOf { it.priemer.replace(",", ".").toDouble() * it.vaha } / zoznamKategorii.sumOf { it.vaha }
             } else 0.0
-
             _uiState.update { it.copy(
-                nazovPredmetu = predmet[0].predmet,
+                userId = predmet.first().osobaId,
+                nazovPredmetu = predmet.first().predmet,
                 predmetId = predmetId,
                 zoznamKategorii = zoznamKategorii,
                 priemer = String.format("%.2f", priemerPredmetu)
             ) }
+        }
+    }
+    fun PodpisanieZnamok() {
+        viewModelScope.launch {
+            val userId = uiState.value.userId
+            val predmety = znamkyRepository.getAllPredmety(userId)
+            val kategorie = znamkyRepository.getAllKategorie()
+            val vysledok = mutableListOf<Int>()
+            for (predmet in predmety) {
+                val kategoriePredmetu = kategorie.filter { it.predmetId == predmet.predmetId }
+                vysledok.addAll(kategoriePredmetu.map { it.kategoriaId })
+            }
+            RetrofitClient.apiService.MobileGetPodpisanieZnamok(PoziadavkyNaPodpisZnamok(vysledok, userId))
         }
     }
 }

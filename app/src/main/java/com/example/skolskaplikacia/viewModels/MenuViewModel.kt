@@ -90,7 +90,7 @@
                     val (existRozvrh, existSpravy) = DatabaseRequest()
                     val deti = detiRepository.getAllDeti()
                     if (deti.isNotEmpty()) {
-                        _uiState.update { it.copy(selectUser = deti[0].dietaId, zoznamDeti = deti) }
+                        _uiState.update { it.copy(selectUser = deti.first().dietaId, zoznamDeti = deti) }
                         setBlokovRozvrhu()
                         deti.forEach { item ->
                             val (rozvrh, spravy, znamky) = ServerRequest(item.dietaId)
@@ -241,7 +241,7 @@
                     val deti = detiRepository.getAllDeti()
                     if (deti.isNotEmpty()) {
                         _uiState.update { currentState ->
-                            currentState.copy(selectUser = deti[0].dietaId, zoznamDeti = deti)
+                            currentState.copy(selectUser = deti.first().dietaId, zoznamDeti = deti)
                         }
                         setBlokovRozvrhu()
                         try {

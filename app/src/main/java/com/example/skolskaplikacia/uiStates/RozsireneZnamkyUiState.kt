@@ -4,7 +4,8 @@ data class RozsireneZnamkyUiState (
     val nazovPredmetu: String,
     val predmetId: Int,
     val zoznamKategorii: List<Kategorie>,
-    val priemer: String
+    val priemer: String,
+    val userId: Int
 )
 
 data class Kategorie(

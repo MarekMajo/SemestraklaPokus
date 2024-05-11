@@ -16,6 +16,10 @@ data class GetZnamky(val list: List<ZnamkyTuple>)
 
 data class KategorieAllid(val list: List<kategorieZnamky>)
 
+data class PrazdnyReturn(val id: Int)
+
+data class PoziadavkyNaPodpisZnamok(val kategorieAllid: List<Int>, val userId: Int)
+
 data class kategorieZnamky(
     val kategoria_id: Int,
     val znamka: Int,

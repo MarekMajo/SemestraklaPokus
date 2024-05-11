@@ -24,4 +24,7 @@ interface ApiService {
 
     @POST("MobileGetRozsahZnamok")
     suspend fun MobileGetRozsahZnamok(@Body kategorieAllid: List<Int>): KategorieAllid
+
+    @POST("MobileGetPodpisanieZnamok")
+    suspend fun MobileGetPodpisanieZnamok(@Body PoziadavkyNaPodpisZnamok: PoziadavkyNaPodpisZnamok)
 }

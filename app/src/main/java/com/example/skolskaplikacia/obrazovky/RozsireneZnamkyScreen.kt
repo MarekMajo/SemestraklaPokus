@@ -8,9 +8,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
@@ -44,7 +46,8 @@ fun RozsireneZnamkyScreen(
     modifier: Modifier = Modifier,
     RZViewModel: RozsireneZnamkyViewModel,
     navController: NavController,
-    predmetID: Int
+    predmetID: Int,
+    rodic: Int
 ) {
     val uiStateRZ by RZViewModel.uiState.collectAsState()
 
@@ -53,11 +56,11 @@ fun RozsireneZnamkyScreen(
     }
     val configuration = LocalConfiguration.current
     val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
-    var prvaCast = 0.05F
-    var druhaCast = 0.95F
+    var prvaCast = 0.2F
+    var druhaCast = 0.8F
     if (!isPortrait) {
-        prvaCast = 0.2F
-        druhaCast = 0.8F
+        prvaCast = 0.3F
+        druhaCast = 0.7F
     }
 
     Column(modifier = modifier.fillMaxSize()) {
@@ -66,29 +69,105 @@ fun RozsireneZnamkyScreen(
                 .weight(prvaCast)
                 .fillMaxWidth()
                 .background(Color(0xFF8ECEC0))
-
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Button(
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-                    onClick = {navController.popBackStack(Obrazovky.známky.name, inclusive = false)}
-                ) {
-                    Image(painter = painterResource(R.drawable.back), contentDescription = null)
+            if (isPortrait) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Button(
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+                        onClick = { navController.popBackStack("${Obrazovky.známky.name}/${uiStateRZ.userId}/${rodic}", inclusive = false) },
+                        modifier = Modifier
+                            .align(Alignment.Start)
+                    ) {
+                        Image(
+                            painter = painterResource(R.drawable.back),
+                            contentDescription = null,
+                            Modifier.size(25.dp)
+                        )
+                    }
+                    Text(
+                        text = uiStateRZ.nazovPredmetu,
+                        color = Color.Black,
+                        fontSize = 27.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
+                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Celkový priemer: ${uiStateRZ.priemer}",
+                            color = Color.Black,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Spacer(modifier = Modifier.weight(1f))
+                        if (rodic == 1) {
+                            Button(
+                                onClick = { RZViewModel.PodpisanieZnamok() },
+                                colors = ButtonDefaults.buttonColors(containerColor = Color.Magenta)
+                            ) {
+                                Text(text = "Podpísať")
+                            }
+                        }
+                    }
                 }
-                Text(
-                    text = uiStateRZ.nazovPredmetu,
-                    color = Color.Black,
-                    modifier = Modifier
-                        .weight(3f)
-                        .fillMaxWidth(),
-                    fontSize = 27.sp,
-                    textAlign = TextAlign.Center
-                )
+            } else {
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Button(
+                            onClick = { navController.popBackStack("${Obrazovky.známky.name}/${uiStateRZ.userId}", inclusive = false) },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
+                        ) {
+                            Image(
+                                painter = painterResource(R.drawable.back),
+                                contentDescription = null,
+                                modifier = Modifier.size(25.dp)
+                            )
+                        }
+                        Box(
+                            modifier = Modifier.weight(1f),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = uiStateRZ.nazovPredmetu,
+                                color = Color.Black,
+                                fontSize = 27.sp,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                        Spacer(Modifier.size(40.dp))
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Celkový priemer: ${uiStateRZ.priemer}",
+                            color = Color.Black,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Spacer(modifier = Modifier.weight(1f))
+                        if (rodic == 1) {
+                            Button(
+                                onClick = { RZViewModel.PodpisanieZnamok() },
+                                colors = ButtonDefaults.buttonColors(containerColor = Color.Magenta)
+                            ) {
+                                Text(text = "Podpísať")
+                            }
+                        }
+                    }
+                }
             }
-
         }
         Column(
             modifier = Modifier
@@ -98,7 +177,9 @@ fun RozsireneZnamkyScreen(
             verticalArrangement = Arrangement.SpaceEvenly,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            LazyColumn(modifier = modifier.fillMaxSize().padding(8.dp)) {
+            LazyColumn(modifier = modifier
+                .fillMaxSize()
+                .padding(8.dp)) {
                 items(uiStateRZ.zoznamKategorii) { kategoria ->
                     Box(
                         modifier = Modifier
@@ -106,13 +187,20 @@ fun RozsireneZnamkyScreen(
                             .padding(4.dp)
                             .background(Color.White)
                     ) {
-                        Row(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                        Row(modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)) {
                             Column(modifier = Modifier.weight(0.7f)) {
                                 Text(
                                     color = Color.Black,
                                     text = kategoria.nazov,
                                     fontSize = 22.sp,
                                     fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = "Váha: " + kategoria.vaha + " Typ: " + kategoria.typ,
+                                    fontSize = 12.sp,
+                                    color = Color.Gray
                                 )
                                 ZobrazZnamkyText(kategoria)
                             }
@@ -135,6 +223,7 @@ fun RozsireneZnamkyScreen(
             }
         }
     }
+
 }
 @Composable
 fun ZobrazZnamkyText(kategoria: Kategorie) {
@@ -142,9 +231,16 @@ fun ZobrazZnamkyText(kategoria: Kategorie) {
         kategoria.zoznamZnakom.forEachIndexed { index, znamka ->
             if (index > 0) append(" ")
             val znamkaColor = if (znamka.podpisane == 1) Color.Black else Color.Blue
-            val style = SpanStyle(color = znamkaColor, fontSize = 20.sp)
-            withStyle(style) {
+            val znamkaStyle = SpanStyle(color = znamkaColor, fontSize = 22.sp)
+            val prepocetStyle = SpanStyle(color = Color.Gray, fontSize = 15.sp)
+
+            withStyle(znamkaStyle) {
                 append(znamka.znamka.toString())
+            }
+            if (znamka.prepocet != null) {
+                withStyle(prepocetStyle) {
+                    append(" > " + znamka.prepocet)
+                }
             }
         }
     }

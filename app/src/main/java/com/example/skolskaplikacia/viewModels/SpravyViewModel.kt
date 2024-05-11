@@ -22,7 +22,6 @@ class SpravyViewModel (
     fun loadData(userId: Int){
         viewModelScope.launch {
             val spravy = spravyRepository.getUserSpravy(userId)
-            println("ahoj")
             _uiState.update { it.copy(spravyZoznam = spravy, selectUser = userId)}
         }
     }

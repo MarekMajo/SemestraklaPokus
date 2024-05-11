@@ -104,26 +104,27 @@ fun MenuScreen(
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            val rodic = if (uiStatemenu.zoznamDeti.size > 0) 1 else 0
             if (isPortrait) {
                 Row (modifier = Modifier.padding(bottom = 4.dp, top = 20.dp)) {
-                    NavigacneTlacidla("Správy", R.drawable.spravy, navController, uiStatemenu.selectUser)
+                    NavigacneTlacidla("Správy", R.drawable.spravy, navController, uiStatemenu.selectUser, rodic)
                     Spacer(Modifier.width(8.dp))
-                    NavigacneTlacidla("Dochádzka", R.drawable.dochadzka, navController, uiStatemenu.selectUser)
+                    NavigacneTlacidla("Dochádzka", R.drawable.dochadzka, navController, uiStatemenu.selectUser, rodic)
                 }
                 Row (modifier = Modifier.padding(top = 4.dp)) {
-                    NavigacneTlacidla("Známky", R.drawable.znamky, navController, uiStatemenu.selectUser)
+                    NavigacneTlacidla("Známky", R.drawable.znamky, navController, uiStatemenu.selectUser, rodic)
                     Spacer(Modifier.width(8.dp))
-                    NavigacneTlacidla("Rozvrh", R.drawable.rozvrh, navController, uiStatemenu.selectUser)
+                    NavigacneTlacidla("Rozvrh", R.drawable.rozvrh, navController, uiStatemenu.selectUser, rodic)
                 }
             } else {
                 Row (modifier = Modifier.padding(top = 30.dp))  {
-                    NavigacneTlacidla("Správy", R.drawable.spravy, navController, uiStatemenu.selectUser)
+                    NavigacneTlacidla("Správy", R.drawable.spravy, navController, uiStatemenu.selectUser, rodic)
                     Spacer(Modifier.width(8.dp))
-                    NavigacneTlacidla("Dochádzka", R.drawable.dochadzka, navController, uiStatemenu.selectUser)
+                    NavigacneTlacidla("Dochádzka", R.drawable.dochadzka, navController, uiStatemenu.selectUser, rodic)
                     Spacer(Modifier.width(8.dp))
-                    NavigacneTlacidla("Známky", R.drawable.znamky, navController, uiStatemenu.selectUser)
+                    NavigacneTlacidla("Známky", R.drawable.znamky, navController, uiStatemenu.selectUser, rodic)
                     Spacer(Modifier.width(8.dp))
-                    NavigacneTlacidla("Rozvrh", R.drawable.rozvrh, navController, uiStatemenu.selectUser)
+                    NavigacneTlacidla("Rozvrh", R.drawable.rozvrh, navController, uiStatemenu.selectUser, rodic)
                 }
             }
         }
@@ -201,7 +202,7 @@ fun DetiButton(zoznam: List<Deti>, menuViewModel: MenuViewModel , uiStatemenu: M
 }
 
 @Composable
-fun NavigacneTlacidla(text: String, image: Int, navController: NavController, selectUser: Int) {
+fun NavigacneTlacidla(text: String, image: Int, navController: NavController, selectUser: Int, rodic: Int) {
     Button(
         modifier = Modifier
             .size(width = 200.dp, height = 100.dp)
@@ -209,7 +210,7 @@ fun NavigacneTlacidla(text: String, image: Int, navController: NavController, se
         shape = RectangleShape,
         colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.1F), contentColor = Color.Black),
         onClick = {
-            navController.navigate("${Obrazovky.valueOf(text.toLowerCase()).name}/${selectUser}")
+            navController.navigate("${Obrazovky.valueOf(text.toLowerCase()).name}/${selectUser}/${rodic}")
         }
     ) {
         Image(painter = painterResource(id = image), contentDescription = null, modifier = Modifier.width(50.dp))

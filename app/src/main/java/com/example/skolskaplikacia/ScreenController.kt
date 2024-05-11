@@ -93,7 +93,7 @@ fun Aplikacia(
                 menuViewModel = menuViewModel
             )
         }
-        composable(route = "${Obrazovky.správy.name}/{userId}") { backStackEntry ->
+        composable(route = "${Obrazovky.správy.name}/{userId}/{rodic}") { backStackEntry ->
             SpravyScreen(
                 modifier = Modifier,
                 spravyViewModel = spravyViewModel,
@@ -101,7 +101,7 @@ fun Aplikacia(
                 userId = backStackEntry.arguments?.getString("userId")?.toInt() ?: -1
             )
         }
-        composable(route = "${Obrazovky.rozvrh.name}/{userId}") { backStackEntry ->
+        composable(route = "${Obrazovky.rozvrh.name}/{userId}/{rodic}") { backStackEntry ->
             RozvrhScreen(
                 modifier = Modifier,
                 rozvrhViewModel = rozvrhViewModel,
@@ -109,7 +109,7 @@ fun Aplikacia(
                 userId = backStackEntry.arguments?.getString("userId")?.toInt() ?: -1
             )
         }
-        composable(route = "${Obrazovky.dochádzka.name}/{userId}") { backStackEntry ->
+        composable(route = "${Obrazovky.dochádzka.name}/{userId}/{rodic}") { backStackEntry ->
             DochadzkaScreen(
                 modifier = Modifier,
                 dochadzkaViewModel = dochadzkaViewModel,
@@ -117,20 +117,22 @@ fun Aplikacia(
                 userId = backStackEntry.arguments?.getString("userId")?.toInt() ?: -1
             )
         }
-        composable(route = "${Obrazovky.známky.name}/{userId}") { backStackEntry ->
+        composable(route = "${Obrazovky.známky.name}/{userId}/{rodic}") { backStackEntry ->
             ZnamkyScreen(
                 modifier = Modifier,
                 znamkyViewModel = znamkyViewModel,
                 navController = navController,
-                userId = backStackEntry.arguments?.getString("userId")?.toInt() ?: -1
+                userId = backStackEntry.arguments?.getString("userId")?.toInt() ?: -1,
+                rodic = backStackEntry.arguments?.getString("rodic")?.toInt() ?: -1
             )
         }
-        composable(route = "${Obrazovky.rozsirene.name}/{predmetID}") { backStackEntry ->
+        composable(route = "${Obrazovky.rozsirene.name}/{predmetID}/{rodic}") { backStackEntry ->
             RozsireneZnamkyScreen(
                 modifier = Modifier,
                 RZViewModel = rozsireneZnamkyViewModel,
                 navController = navController,
-                predmetID = backStackEntry.arguments?.getString("predmetID")?.toInt() ?: -1
+                predmetID = backStackEntry.arguments?.getString("predmetID")?.toInt() ?: -1,
+                rodic = backStackEntry.arguments?.getString("rodic")?.toInt() ?: -1
             )
         }
 

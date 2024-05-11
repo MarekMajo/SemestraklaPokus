@@ -2,6 +2,9 @@ package com.example.skolskaplikacia.viewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.skolskaplikacia.network.PoziadavkyNaPodpisZnamok
+import com.example.skolskaplikacia.network.RetrofitClient
+import com.example.skolskaplikacia.network.UserId
 import com.example.skolskaplikacia.repository.DetiRepository
 import com.example.skolskaplikacia.repository.OsobaRepository
 import com.example.skolskaplikacia.repository.ZnamkyRepository
@@ -43,7 +46,7 @@ class ZnamkyViewModel (
                                 if (prepocteneZnamky.isNotEmpty()) {
                                     znamkyPrePredmet.add(
                                         Znamka(
-                                            prepocteneZnamky[0].znamka,
+                                            prepocteneZnamky.first().znamka,
                                             kategoria.vaha.toDouble(),
                                             znamka.podpis
                                         )
@@ -70,6 +73,26 @@ class ZnamkyViewModel (
                 }
                 _uiState.update {it.copy(predmetyZiaka = vysledok)}
             }
-
     }
+
+    fun PodpisanieZnamok() {
+        viewModelScope.launch {
+            val userId = uiState.value.selectUser
+            val predmety = znamkyRepository.getAllPredmety(userId)
+            val kategorie = znamkyRepository.getAllKategorie()
+            val vysledok = mutableListOf<Int>()
+            for (predmet in predmety) {
+                val kategoriePredmetu = kategorie.filter { it.predmetId == predmet.predmetId }
+                vysledok.addAll(kategoriePredmetu.map { it.kategoriaId })
+            }
+            try {
+                RetrofitClient.apiService.MobileGetPodpisanieZnamok(PoziadavkyNaPodpisZnamok(vysledok, userId))
+            } catch (e: Exception) {
+                println(e)
+            }
+        }
+    }
+
+
+
 }

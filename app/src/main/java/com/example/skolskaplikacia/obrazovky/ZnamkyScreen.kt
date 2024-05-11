@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -47,7 +49,8 @@ fun ZnamkyScreen(
     modifier: Modifier = Modifier,
     znamkyViewModel: ZnamkyViewModel,
     navController: NavController,
-    userId: Int
+    userId: Int,
+    rodic: Int
 ) {
     val uiStateznamky by znamkyViewModel.uiState.collectAsState()
     val configuration = LocalConfiguration.current
@@ -91,11 +94,15 @@ fun ZnamkyScreen(
                     fontSize = 27.sp,
                     textAlign = TextAlign.Center
                 )
-                Button(
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-                    onClick = {}
-                ) {
-                    Text(text = "Podpísať")
+                if (rodic == 1) {
+                    Button(
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+                        onClick = { znamkyViewModel.PodpisanieZnamok() }
+                    ) {
+                        Text(text = "Podpísať")
+                    }
+                } else {
+                    Spacer(modifier = Modifier.weight(1f))
                 }
             }
 
@@ -108,7 +115,9 @@ fun ZnamkyScreen(
             verticalArrangement = Arrangement.SpaceEvenly,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            LazyColumn(modifier = modifier.fillMaxSize().padding(8.dp)) {
+            LazyColumn(modifier = modifier
+                .fillMaxSize()
+                .padding(8.dp)) {
                 items(uiStateznamky.predmetyZiaka) { predmet ->
                     Box(
                         modifier = Modifier
@@ -116,10 +125,12 @@ fun ZnamkyScreen(
                             .padding(4.dp)
                             .background(Color.White)
                             .clickable {
-                                navController.navigate("${Obrazovky.rozsirene.name}/${predmet.predmetID}")
+                                navController.navigate("${Obrazovky.rozsirene.name}/${predmet.predmetID}/${rodic}")
                             }
                     ) {
-                        Row(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                        Row(modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)) {
                             Column(modifier = Modifier.weight(0.7f)) {
                                 Text(
                                     color = Color.Black,
