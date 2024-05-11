@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.skolskaplikacia.viewModels.LoginViewModel
 import com.example.skolskaplikacia.viewModels.MenuViewModel
+import com.example.skolskaplikacia.viewModels.RozsireneZnamkyViewModel
 import com.example.skolskaplikacia.viewModels.RozvrhViewModel
 import com.example.skolskaplikacia.viewModels.SpravyViewModel
 import com.example.skolskaplikacia.viewModels.ZnamkyViewModel
@@ -27,7 +28,10 @@ class DatabaseFactory(
                 SpravyViewModel(spravyRepository) as T
             }
             modelClass.isAssignableFrom(ZnamkyViewModel::class.java) -> {
-                ZnamkyViewModel(osobaRepository, detiRepository, znamkyRepository) as T
+                ZnamkyViewModel(znamkyRepository) as T
+            }
+            modelClass.isAssignableFrom(RozsireneZnamkyViewModel::class.java) -> {
+                RozsireneZnamkyViewModel(znamkyRepository) as T
             }
             modelClass.isAssignableFrom(RozvrhViewModel::class.java) -> {
                 RozvrhViewModel(rozvrhRepository) as T

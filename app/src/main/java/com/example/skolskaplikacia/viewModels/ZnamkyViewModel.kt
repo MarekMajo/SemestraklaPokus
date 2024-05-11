@@ -5,30 +5,26 @@ import androidx.lifecycle.viewModelScope
 import com.example.skolskaplikacia.repository.DetiRepository
 import com.example.skolskaplikacia.repository.OsobaRepository
 import com.example.skolskaplikacia.repository.ZnamkyRepository
+import com.example.skolskaplikacia.uiStates.VysledokPredmetu
+import com.example.skolskaplikacia.uiStates.Znamka
 import com.example.skolskaplikacia.uiStates.ZnamkyUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ZnamkyViewModel (
-    private val osobaRepository: OsobaRepository,
-    private val detiRepository: DetiRepository,
     private val znamkyRepository: ZnamkyRepository
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(ZnamkyUiState())
+    private val _uiState = MutableStateFlow(ZnamkyUiState(predmetyZiaka = listOf(), selectUser = 0))
     val uiState: StateFlow<ZnamkyUiState> = _uiState.asStateFlow()
-    var b = true
-    fun vytvorZnamkyVysledok() {
-        data class Znamka(val znamka: Int, val vaha: Double)
-        data class VysledokPredmetu(val predmet: String, val znamky: List<Znamka>, val priemer: String)
-
+    fun vytvorZnamkyVysledok(idZiaka: Int) {
         viewModelScope.launch {
-            if (b) {
-                b = false
-                val predmety = znamkyRepository.getAllPredmety()
+                val predmety = znamkyRepository.getAllPredmety(idZiaka)
                 val kategorie = znamkyRepository.getAllKategorie()
                 val znamky = znamkyRepository.getAllZnamky()
+                _uiState.update {it.copy(selectUser = idZiaka)}
 
                 val vysledok = predmety.map { predmet ->
                     val znamkyPrePredmet = mutableListOf<Znamka>()
@@ -48,7 +44,8 @@ class ZnamkyViewModel (
                                     znamkyPrePredmet.add(
                                         Znamka(
                                             prepocteneZnamky[0].znamka,
-                                            kategoria.vaha.toDouble()
+                                            kategoria.vaha.toDouble(),
+                                            znamka.podpis
                                         )
                                     )
                                 }
@@ -58,7 +55,8 @@ class ZnamkyViewModel (
                                 znamkyPrePredmet.add(
                                     Znamka(
                                         znamka.znamka,
-                                        kategoria.vaha.toDouble()
+                                        kategoria.vaha.toDouble(),
+                                        znamka.podpis
                                     )
                                 )
                             }
@@ -68,12 +66,10 @@ class ZnamkyViewModel (
                     val sumaVah = znamkyPrePredmet.sumOf { it.vaha }
                     val priemer = if (sumaVah != 0.0) sumaVahovanychZnamok / sumaVah else 0.0
 
-                    VysledokPredmetu(predmet.predmet, znamkyPrePredmet, String.format("%.2f", priemer))
+                    VysledokPredmetu(predmet.predmet, predmet.predmetId , znamkyPrePredmet, String.format("%.2f", priemer))
                 }
-
-                vysledok.forEach { println(it) }
-                println("---------")
+                _uiState.update {it.copy(predmetyZiaka = vysledok)}
             }
-        }
+
     }
 }

@@ -69,7 +69,7 @@ fun Aplikacia(
     val rozvrhViewModel: RozvrhViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository, spravyRepository, znamkyRepository))
     val dochadzkaViewModel: DochadzkaViewModel = viewModel()
     val znamkyViewModel: ZnamkyViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository, spravyRepository, znamkyRepository))
-    val rozsireneZnamkyViewModel: RozsireneZnamkyViewModel = viewModel()
+    val rozsireneZnamkyViewModel: RozsireneZnamkyViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository, spravyRepository, znamkyRepository))
     val uiState by loginViewModel.uiState.collectAsState()
 
     NavHost(
@@ -93,42 +93,46 @@ fun Aplikacia(
                 menuViewModel = menuViewModel
             )
         }
-        composable(route = Obrazovky.správy.name) {
+        composable(route = "${Obrazovky.správy.name}/{userId}") { backStackEntry ->
             SpravyScreen(
                 modifier = Modifier,
-                menuViewModel = menuViewModel,
                 spravyViewModel = spravyViewModel,
-                BackButton = {navController.popBackStack(Obrazovky.menu.name, inclusive = false)}
+                BackButton = {navController.popBackStack(Obrazovky.menu.name, inclusive = false)},
+                userId = backStackEntry.arguments?.getString("userId")?.toInt() ?: -1
             )
         }
-        composable(route = Obrazovky.rozvrh.name) {
+        composable(route = "${Obrazovky.rozvrh.name}/{userId}") { backStackEntry ->
             RozvrhScreen(
                 modifier = Modifier,
-                menuViewModel = menuViewModel,
                 rozvrhViewModel = rozvrhViewModel,
-                BackButton = {navController.popBackStack(Obrazovky.menu.name, inclusive = false)}
+                BackButton = {navController.popBackStack(Obrazovky.menu.name, inclusive = false)},
+                userId = backStackEntry.arguments?.getString("userId")?.toInt() ?: -1
             )
         }
-        composable(route = Obrazovky.dochádzka.name) {
+        composable(route = "${Obrazovky.dochádzka.name}/{userId}") { backStackEntry ->
             DochadzkaScreen(
                 modifier = Modifier,
                 dochadzkaViewModel = dochadzkaViewModel,
-                BackButton = {navController.popBackStack(Obrazovky.menu.name, inclusive = false)}
+                BackButton = {navController.popBackStack(Obrazovky.menu.name, inclusive = false)},
+                userId = backStackEntry.arguments?.getString("userId")?.toInt() ?: -1
             )
         }
-        composable(route = Obrazovky.známky.name) {
+        composable(route = "${Obrazovky.známky.name}/{userId}") { backStackEntry ->
             ZnamkyScreen(
                 modifier = Modifier,
                 znamkyViewModel = znamkyViewModel,
-                navController = navController
+                navController = navController,
+                userId = backStackEntry.arguments?.getString("userId")?.toInt() ?: -1
             )
         }
-        composable(route = Obrazovky.rozsirene.name) {
+        composable(route = "${Obrazovky.rozsirene.name}/{predmetID}") { backStackEntry ->
             RozsireneZnamkyScreen(
                 modifier = Modifier,
-                rozsireneZnamkyViewModel = rozsireneZnamkyViewModel,
-                navController = navController
+                RZViewModel = rozsireneZnamkyViewModel,
+                navController = navController,
+                predmetID = backStackEntry.arguments?.getString("predmetID")?.toInt() ?: -1
             )
         }
+
     }
 }

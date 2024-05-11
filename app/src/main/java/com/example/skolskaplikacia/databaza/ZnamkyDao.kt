@@ -24,8 +24,11 @@ interface ZnamkyDao {
     @Query("SELECT kategoriaId FROM kategorie")
     suspend fun getAllKategoriaId(): List<Int>
 
-    @Query("SELECT * FROM predmety")
-    suspend fun getAllPredmety(): List<Predmety>
+    @Query("SELECT * FROM predmety where osobaId = :id ")
+    suspend fun getAllPredmety(id: Int): List<Predmety>
+
+    @Query("SELECT * FROM predmety where predmetId = :id ")
+    suspend fun getPredmet(id: Int): List<Predmety>
 
     @Query("SELECT * FROM kategorie")
     suspend fun getAllKategorie(): List<Kategorie>

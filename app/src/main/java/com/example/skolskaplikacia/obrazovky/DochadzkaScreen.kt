@@ -11,6 +11,7 @@ fun DochadzkaScreen(
     modifier: Modifier = Modifier,
     dochadzkaViewModel: DochadzkaViewModel,
     BackButton: () -> Unit = {},
+    userId: Int
 ) {
     Button(onClick = { BackButton() }) {
         Text(text = "späť")

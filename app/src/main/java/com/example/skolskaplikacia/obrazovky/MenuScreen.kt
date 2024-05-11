@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -45,6 +46,7 @@ import com.example.skolskaplikacia.uiStates.MenuUiState
 import com.example.skolskaplikacia.uiStates.blokyCasov
 import com.example.skolskaplikacia.viewModels.LoginViewModel
 import com.example.skolskaplikacia.viewModels.MenuViewModel
+import androidx.compose.ui.graphics.Brush
 
 
 @Composable
@@ -68,20 +70,19 @@ fun MenuScreen(
 
     val configuration = LocalConfiguration.current
     val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
-    var prvaCast = 0.4F
-    var druhaCast = 0.6F
-    if (!isPortrait) {
-        prvaCast = 0.5F
-        druhaCast = 0.5F
-    }
+    val gradientColors = listOf(Color(0xFF8ECEC0), Color(0xFFF1F1F1))
 
-    Column(modifier = modifier.fillMaxSize()) {
+    Column(modifier = modifier.fillMaxSize().background(
+        Brush.verticalGradient(
+            colors = gradientColors,
+            startY = 0f,
+            endY = Float.POSITIVE_INFINITY
+        )
+    )) {
         Box(
             modifier = Modifier
-                .weight(prvaCast)
+                .weight(if (isPortrait) 0.2F else 0.8F)
                 .fillMaxWidth()
-                .background(Color(0xFF8ECEC0))
-
         ) {
             Column {
                 Row {
@@ -93,37 +94,36 @@ fun MenuScreen(
                     Spacer(modifier = Modifier.weight(1f))
                     DetiButton(zoznam = uiStatemenu.zoznamDeti, menuViewModel, uiStatemenu)
                 }
+                Spacer(Modifier.height(if (isPortrait) 50.dp else 0.dp))
                 MenuRozvrh(blokyCasov, uiStatemenu.blokyVDni)
             }
-
         }
         Column(
             modifier = Modifier
-                .weight(druhaCast)
-                .fillMaxWidth()
-                .background(Color(0xfff1f1f1)),
-            verticalArrangement = Arrangement.SpaceEvenly,
+                .weight(if (isPortrait) 0.3F else 0.7F)
+                .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             if (isPortrait) {
-                Row {
-                    NavigacneTlacidla("Správy", R.drawable.spravy, navController)
+                Row (modifier = Modifier.padding(bottom = 4.dp, top = 20.dp)) {
+                    NavigacneTlacidla("Správy", R.drawable.spravy, navController, uiStatemenu.selectUser)
                     Spacer(Modifier.width(8.dp))
-                    NavigacneTlacidla("Dochádzka", R.drawable.dochadzka, navController)
+                    NavigacneTlacidla("Dochádzka", R.drawable.dochadzka, navController, uiStatemenu.selectUser)
                 }
-                Row {
-                    NavigacneTlacidla("Známky", R.drawable.znamky, navController)
+                Row (modifier = Modifier.padding(top = 4.dp)) {
+                    NavigacneTlacidla("Známky", R.drawable.znamky, navController, uiStatemenu.selectUser)
                     Spacer(Modifier.width(8.dp))
-                    NavigacneTlacidla("Rozvrh", R.drawable.rozvrh, navController)
+                    NavigacneTlacidla("Rozvrh", R.drawable.rozvrh, navController, uiStatemenu.selectUser)
                 }
             } else {
-                Row {
-                    NavigacneTlacidla("Správy", R.drawable.spravy, navController)
+                Row (modifier = Modifier.padding(top = 30.dp))  {
+                    NavigacneTlacidla("Správy", R.drawable.spravy, navController, uiStatemenu.selectUser)
                     Spacer(Modifier.width(8.dp))
-                    NavigacneTlacidla("Dochádzka", R.drawable.dochadzka, navController)
-                    NavigacneTlacidla("Známky", R.drawable.znamky, navController)
+                    NavigacneTlacidla("Dochádzka", R.drawable.dochadzka, navController, uiStatemenu.selectUser)
                     Spacer(Modifier.width(8.dp))
-                    NavigacneTlacidla("Rozvrh", R.drawable.rozvrh, navController)
+                    NavigacneTlacidla("Známky", R.drawable.znamky, navController, uiStatemenu.selectUser)
+                    Spacer(Modifier.width(8.dp))
+                    NavigacneTlacidla("Rozvrh", R.drawable.rozvrh, navController, uiStatemenu.selectUser)
                 }
             }
         }
@@ -201,15 +201,15 @@ fun DetiButton(zoznam: List<Deti>, menuViewModel: MenuViewModel , uiStatemenu: M
 }
 
 @Composable
-fun NavigacneTlacidla(text: String, image: Int, navController: NavController) {
+fun NavigacneTlacidla(text: String, image: Int, navController: NavController, selectUser: Int) {
     Button(
         modifier = Modifier
-            .size(width = 200.dp, height = 200.dp)
-            .padding(5.dp),
+            .size(width = 200.dp, height = 100.dp)
+            .padding(1.dp),
         shape = RectangleShape,
-        colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black),
+        colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.1F), contentColor = Color.Black),
         onClick = {
-            navController.navigate(Obrazovky.valueOf(text.toLowerCase()).name)
+            navController.navigate("${Obrazovky.valueOf(text.toLowerCase()).name}/${selectUser}")
         }
     ) {
         Image(painter = painterResource(id = image), contentDescription = null, modifier = Modifier.width(50.dp))

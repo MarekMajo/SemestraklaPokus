@@ -27,8 +27,8 @@ class ZnamkyRepository(private val znamkyDao: ZnamkyDao) {
         znamkyDao.deleteAllPredmety()
     }
 
-    suspend fun getAllPredmety(): List<Predmety> {
-        return znamkyDao.getAllPredmety()
+    suspend fun getAllPredmety(ziakId: Int): List<Predmety> {
+        return znamkyDao.getAllPredmety(ziakId)
     }
 
     suspend fun getAllKategorie(): List<Kategorie> {
@@ -49,5 +49,9 @@ class ZnamkyRepository(private val znamkyDao: ZnamkyDao) {
 
     suspend fun getZnamkuZprepoctu(id: Int, znamka: Int): List<ZnamkaNaPrepocet> {
         return znamkyDao.getZnamkuZprepoctu(id, znamka)
+    }
+
+    suspend fun getPredmet(predmetId: Int): List<Predmety> {
+        return znamkyDao.getPredmet(predmetId)
     }
 }

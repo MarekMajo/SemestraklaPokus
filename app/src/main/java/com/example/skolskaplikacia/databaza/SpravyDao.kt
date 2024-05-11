@@ -18,6 +18,6 @@ interface SpravyDao {
     @Query("SELECT * FROM spravy")
     suspend fun getAllSpravy(): List<Spravy>
 
-    @Query("SELECT * FROM spravy where osobaId = :id")
+    @Query("SELECT * FROM spravy where osobaId = :id order by datum desc")
     suspend fun getUserSpravy(id: Int): List<Spravy>
 }

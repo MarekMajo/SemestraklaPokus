@@ -45,17 +45,16 @@ import com.example.skolskaplikacia.viewModels.RozvrhViewModel
 @Composable
 fun RozvrhScreen(
     modifier: Modifier = Modifier,
-    menuViewModel: MenuViewModel,
     rozvrhViewModel: RozvrhViewModel,
     BackButton: () -> Unit = {},
+    userId: Int
 ) {
-    val uiStatemenu by menuViewModel.uiState.collectAsState()
     val uiStaterozvrh by rozvrhViewModel.uiState.collectAsState()
     val configuration = LocalConfiguration.current
     val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
-    LaunchedEffect(uiStatemenu.selectUser){
-        if (uiStatemenu.selectUser != uiStaterozvrh.selectUser) {
-            rozvrhViewModel.loadData(uiStatemenu.selectUser)
+    LaunchedEffect(userId){
+        if (userId != uiStaterozvrh.selectUser) {
+            rozvrhViewModel.loadData(userId)
         }
     }
     var prvaCast = 0.05F

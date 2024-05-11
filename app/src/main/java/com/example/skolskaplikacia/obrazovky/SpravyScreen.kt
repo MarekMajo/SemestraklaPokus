@@ -37,18 +37,15 @@ import com.example.skolskaplikacia.viewModels.SpravyViewModel
 @Composable
 fun SpravyScreen(
     modifier: Modifier = Modifier,
-    menuViewModel: MenuViewModel,
     spravyViewModel: SpravyViewModel,
     BackButton: () -> Unit = {},
+    userId: Int
 ) {
-    val uiStatemenu by menuViewModel.uiState.collectAsState()
     val uiStatespravy by spravyViewModel.uiState.collectAsState()
     val configuration = LocalConfiguration.current
     val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
-    LaunchedEffect(uiStatemenu.selectUser){
-        if (uiStatemenu.selectUser != uiStatespravy.selectUser) {
-            spravyViewModel.loadData(uiStatemenu.selectUser)
-        }
+    LaunchedEffect(userId) {
+        if (userId != uiStatespravy.selectUser) spravyViewModel.loadData(userId)
     }
     var prvaCast = 0.05F
     var druhaCast = 0.95F

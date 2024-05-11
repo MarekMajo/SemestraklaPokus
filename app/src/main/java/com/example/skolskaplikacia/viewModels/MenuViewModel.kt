@@ -86,7 +86,7 @@
             viewModelScope.launch {
                 if (_uiState.value.reload) {
                     resetUiState()
-                    //_uiState.update { it.copy(reload = false) }
+                    _uiState.update { it.copy(reload = false) }
                     val (existRozvrh, existSpravy) = DatabaseRequest()
                     val deti = detiRepository.getAllDeti()
                     if (deti.isNotEmpty()) {
