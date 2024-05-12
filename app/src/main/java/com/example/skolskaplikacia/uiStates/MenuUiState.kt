@@ -19,6 +19,10 @@ data class BlokTextu(
     val id: Int,
     val texty: List<String>
 )
+
+data class Quadruple<A, B, C, D>(val RozvrhTuple: A, val SpravyTuple: B, val ZnamkyTuple: C, val dochadzkaDen: D)
+
+
 val blokyCasov = listOf(
     BlokCasu(1, listOf("7:45", "8:30")),
     BlokCasu(2, listOf("8:40", "9:25")),

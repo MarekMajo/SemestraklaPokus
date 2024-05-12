@@ -1,5 +1,6 @@
 package com.example.skolskaplikacia
 
+import DochadzkaScreen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -14,7 +15,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.skolskaplikacia.databaza.AppDatabaza
-import com.example.skolskaplikacia.obrazovky.DochadzkaScreen
 import com.example.skolskaplikacia.obrazovky.LoginScreen
 import com.example.skolskaplikacia.obrazovky.MenuScreen
 import com.example.skolskaplikacia.obrazovky.RozsireneZnamkyScreen
@@ -23,6 +23,7 @@ import com.example.skolskaplikacia.obrazovky.SpravyScreen
 import com.example.skolskaplikacia.obrazovky.ZnamkyScreen
 import com.example.skolskaplikacia.repository.DatabaseFactory
 import com.example.skolskaplikacia.repository.DetiRepository
+import com.example.skolskaplikacia.repository.DochadzkaRepository
 import com.example.skolskaplikacia.repository.OsobaRepository
 import com.example.skolskaplikacia.repository.RozvrhRepository
 import com.example.skolskaplikacia.repository.SpravyRepository
@@ -63,13 +64,14 @@ fun Aplikacia(
     val detiRepository = DetiRepository(db.detiDao())
     val spravyRepository = SpravyRepository(db.spravyDao())
     val znamkyRepository = ZnamkyRepository(db.znamkyDao())
-    val loginViewModel: LoginViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository, spravyRepository, znamkyRepository))
-    val menuViewModel: MenuViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository, spravyRepository, znamkyRepository))
-    val spravyViewModel: SpravyViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository, spravyRepository, znamkyRepository))
-    val rozvrhViewModel: RozvrhViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository, spravyRepository, znamkyRepository))
-    val dochadzkaViewModel: DochadzkaViewModel = viewModel()
-    val znamkyViewModel: ZnamkyViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository, spravyRepository, znamkyRepository))
-    val rozsireneZnamkyViewModel: RozsireneZnamkyViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository, spravyRepository, znamkyRepository))
+    val dochadzkaRepository = DochadzkaRepository(db.dochadzkaDao())
+    val loginViewModel: LoginViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository, spravyRepository, znamkyRepository, dochadzkaRepository))
+    val menuViewModel: MenuViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository, spravyRepository, znamkyRepository, dochadzkaRepository))
+    val spravyViewModel: SpravyViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository, spravyRepository, znamkyRepository, dochadzkaRepository))
+    val rozvrhViewModel: RozvrhViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository, spravyRepository, znamkyRepository, dochadzkaRepository))
+    val dochadzkaViewModel: DochadzkaViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository, spravyRepository, znamkyRepository, dochadzkaRepository))
+    val znamkyViewModel: ZnamkyViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository, spravyRepository, znamkyRepository, dochadzkaRepository))
+    val rozsireneZnamkyViewModel: RozsireneZnamkyViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository, spravyRepository, znamkyRepository, dochadzkaRepository))
     val uiState by loginViewModel.uiState.collectAsState()
 
     NavHost(

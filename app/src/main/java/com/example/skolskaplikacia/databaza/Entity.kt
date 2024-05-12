@@ -103,4 +103,14 @@ data class Znamky(
     val podpis: Int
 )
 
+@Entity(tableName = "dochadzka")
+data class Dochadzka(
+    @PrimaryKey val id_dochadza: Int,
+    val osobaId: Int,
+    val den: String,
+    val block: Int,
+    val typ: Int,
+    val poznamka: Int,
+    val ospravedlnene: Int
+)
 

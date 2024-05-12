@@ -3,7 +3,6 @@ package com.example.skolskaplikacia.obrazovky
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,7 +37,6 @@ import androidx.navigation.NavController
 import com.example.skolskaplikacia.Obrazovky
 import com.example.skolskaplikacia.R
 import com.example.skolskaplikacia.uiStates.Kategorie
-import com.example.skolskaplikacia.uiStates.VysledokPredmetu
 import com.example.skolskaplikacia.viewModels.RozsireneZnamkyViewModel
 
 @Composable
@@ -107,7 +105,7 @@ fun RozsireneZnamkyScreen(
                         if (rodic == 1) {
                             Button(
                                 onClick = { RZViewModel.PodpisanieZnamok() },
-                                colors = ButtonDefaults.buttonColors(containerColor = Color.Magenta)
+                                colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.1F), contentColor = Color.Black)
                             ) {
                                 Text(text = "Podpísať")
                             }

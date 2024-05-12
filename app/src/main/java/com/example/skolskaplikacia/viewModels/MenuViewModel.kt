@@ -2,6 +2,7 @@
 
     import androidx.lifecycle.ViewModel
     import androidx.lifecycle.viewModelScope
+    import com.example.skolskaplikacia.databaza.Dochadzka
     import com.example.skolskaplikacia.databaza.Kategorie
     import com.example.skolskaplikacia.databaza.Predmety
     import com.example.skolskaplikacia.databaza.Rozvrh
@@ -13,13 +14,16 @@
     import com.example.skolskaplikacia.network.SpravyTuple
     import com.example.skolskaplikacia.network.UserId
     import com.example.skolskaplikacia.network.ZnamkyTuple
+    import com.example.skolskaplikacia.network.dochadzkaDen
     import com.example.skolskaplikacia.repository.DetiRepository
+    import com.example.skolskaplikacia.repository.DochadzkaRepository
     import com.example.skolskaplikacia.repository.OsobaRepository
     import com.example.skolskaplikacia.repository.RozvrhRepository
     import com.example.skolskaplikacia.repository.SpravyRepository
     import com.example.skolskaplikacia.repository.ZnamkyRepository
     import com.example.skolskaplikacia.uiStates.BlokTextu
     import com.example.skolskaplikacia.uiStates.MenuUiState
+    import com.example.skolskaplikacia.uiStates.Quadruple
     import kotlinx.coroutines.async
     import kotlinx.coroutines.flow.MutableStateFlow
     import kotlinx.coroutines.flow.StateFlow
@@ -33,7 +37,8 @@
         private val rozvrhRepository: RozvrhRepository,
         private val detiRepository: DetiRepository,
         private val spravyRepository: SpravyRepository,
-        private val znamkyRepository: ZnamkyRepository
+        private val znamkyRepository: ZnamkyRepository,
+        private val dochadzkaRepository: DochadzkaRepository
     ) : ViewModel() {
         private val _uiState = MutableStateFlow(MenuUiState(meno = "", priezvisko = "", selectUser = 0, blokyVDni = listOf(), zoznamDeti = listOf()))
         val uiState: StateFlow<MenuUiState> = _uiState.asStateFlow()
@@ -93,7 +98,7 @@
                         _uiState.update { it.copy(selectUser = deti.first().dietaId, zoznamDeti = deti) }
                         setBlokovRozvrhu()
                         deti.forEach { item ->
-                            val (rozvrh, spravy, znamky) = ServerRequest(item.dietaId)
+                            val (rozvrh, spravy, znamky, dochadzka) = ServerRequest(item.dietaId)
                             if (rozvrh.isNotEmpty()) {
                                 val (toAddRozrvrh, toDeleteRozvrh, toUpdateRozvrh) = PorovnajDatabazuRozvrh(rozvrh, existRozvrh, item.dietaId)
                                 PridajDoRozvrhu(toAddRozrvrh)
@@ -105,35 +110,11 @@
                                 PridajDoSpravy(toAddSpravy)
                                 OdstranZSpravy(toDeleteSpravy)
                             }
+                            if (dochadzka.isNotEmpty()) {
+                                PridajDoDochadzky(dochadzka, item.dietaId)
+                            }
                             if (znamky.isNotEmpty()) {
-                                znamkyRepository.deletePredmety(item.dietaId)
-                                znamky.forEach { predmet ->
-                                    val predmetId = znamkyRepository.vlozitPredmet(Predmety(predmet = predmet.predmet, osobaId = item.dietaId))
-                                    predmet.kategorie.forEach { kategoria ->
-                                        val kategoriaId = znamkyRepository.vlozitKategoriu(
-                                            Kategorie(predmetId = predmetId.toInt(), kategoriaId = kategoria.kategoria_id,
-                                                max_body = kategoria.max_body, nazov = kategoria.kategoriaNazov, vaha = kategoria.vaha, typ = kategoria.typ_znamky)
-                                        )
-                                        kategoria.znamkyPodpis.forEach { znamka ->
-                                            znamkyRepository.vlozitZnamka(Znamky(kategoriaId = kategoriaId.toInt(), znamka = znamka.znamka, podpis = 1))
-                                        }
-                                        kategoria.znamkyNePodpis.forEach { znamka ->
-                                            znamkyRepository.vlozitZnamka(Znamky(kategoriaId = kategoriaId.toInt(), znamka = znamka.znamka, podpis = 0))
-                                        }
-                                    }
-                                }
-                                try {
-                                    val znamkaZprepoctu = RetrofitClient.apiService.MobileGetRozsahZnamok(znamkyRepository.getAllKategoriaId()).list
-                                    znamkaZprepoctu.forEach { znamka ->
-                                        znamkyRepository.VlozitNaPrepocet(ZnamkaNaPrepocet(
-                                            kategoriaId = znamka.kategoria_id,
-                                            znamka = znamka.znamka.toInt(),
-                                            rozsah_do = znamka.znamka_do,
-                                            rozsah_od = znamka.znamka_od))
-                                    }
-                                } catch (_: Exception) {
-
-                                }
+                                UpdateZnamkyDatabaza(znamky, item.dietaId)
                             }
 
                         }
@@ -142,7 +123,7 @@
                         if (osoba != null) {
                             _uiState.update { it.copy(reload = false, selectUser = osoba.osobaId) }
                             setBlokovRozvrhu()
-                            val (rozvrh, spravy, znamky) = ServerRequest(osoba.osobaId)
+                            val (rozvrh, spravy, znamky, dochadzka) = ServerRequest(osoba.osobaId)
                             if (rozvrh.isNotEmpty()) {
                                 val (toAddRozrvrh, toDeleteRozvrh, toUpdateRozvrh) = PorovnajDatabazuRozvrh(rozvrh, existRozvrh, osoba.osobaId)
                                 PridajDoRozvrhu(toAddRozrvrh)
@@ -154,36 +135,11 @@
                                 PridajDoSpravy(toAddSpravy)
                                 OdstranZSpravy(toDeleteSpravy)
                             }
+                            if (dochadzka.isNotEmpty()) {
+                                PridajDoDochadzky(dochadzka, osoba.osobaId)
+                            }
                             if (znamky.isNotEmpty()) {
-                                znamkyRepository.deletePredmety(osoba.osobaId)
-                                znamky.forEach { predmet ->
-                                    val predmetId = znamkyRepository.vlozitPredmet(Predmety(predmet = predmet.predmet, osobaId = osoba.osobaId))
-                                    predmet.kategorie.forEach { kategoria ->
-                                        val kategoriaId = znamkyRepository.vlozitKategoriu(
-                                            Kategorie(predmetId = predmetId.toInt(), kategoriaId = kategoria.kategoria_id,
-                                                max_body = kategoria.max_body, nazov = kategoria.kategoriaNazov, vaha = kategoria.vaha, typ = kategoria.typ_znamky)
-                                        )
-                                        kategoria.znamkyPodpis.forEach { znamka ->
-                                            znamkyRepository.vlozitZnamka(Znamky(kategoriaId = kategoriaId.toInt(), znamka = znamka.znamka, podpis = 1))
-                                        }
-                                        kategoria.znamkyNePodpis.forEach { znamka ->
-                                            znamkyRepository.vlozitZnamka(Znamky(kategoriaId = kategoriaId.toInt(), znamka = znamka.znamka, podpis = 0))
-                                        }
-                                    }
-                                }
-                                try {
-                                    val znamkaZprepoctu = RetrofitClient.apiService.MobileGetRozsahZnamok(znamkyRepository.getAllKategoriaId()).list
-                                    znamkaZprepoctu.forEach { znamka ->
-                                        znamkyRepository.VlozitNaPrepocet(ZnamkaNaPrepocet(
-                                            kategoriaId = znamka.kategoria_id,
-                                            znamka = znamka.znamka,
-                                            rozsah_do = znamka.znamka_do,
-                                            rozsah_od = znamka.znamka_od))
-                                    }
-                                } catch (_: Exception) {
-
-                                }
-
+                                UpdateZnamkyDatabaza(znamky, osoba.osobaId)
                             }
                         }
                     }
@@ -192,7 +148,16 @@
             }
         }
 
-        suspend fun ServerRequest(userId: Int):Triple <List<RozvrhTuple>, List<SpravyTuple>, List<ZnamkyTuple>> {
+        suspend fun ServerRequest(userId: Int):Quadruple <List<RozvrhTuple>, List<SpravyTuple>, List<ZnamkyTuple>, List<dochadzkaDen>> {
+
+            val dochadzkaDeferred = viewModelScope.async {
+                try {
+                    RetrofitClient.apiService.MobileGetDochadzka(UserId(userId)).list
+                } catch (e: Exception) {
+                    //println("Chyba pri načítaní dochádzky: ${e.localizedMessage}")
+                    emptyList<dochadzkaDen>()
+                }
+            }
             val rozvrhDeferred = viewModelScope.async {
                 try {
                     RetrofitClient.apiService.getUserRozvrh(UserId(userId)).list
@@ -220,7 +185,8 @@
             val rozvrh = rozvrhDeferred.await()
             val spravy = spravyDeferred.await()
             val znamky = znamkyDeferred.await()
-            return Triple(rozvrh, spravy, znamky)
+            val dochadzka = dochadzkaDeferred.await()
+            return Quadruple(rozvrh, spravy, znamky, dochadzka)
         }
 
         suspend fun DatabaseRequest():Pair <List<Rozvrh>, List<Spravy>> {
@@ -231,162 +197,37 @@
             return Pair(existujuciRozvrh, existujuceSpravy)
         }
 
-
-
-        fun LoadData2() {
-            viewModelScope.launch {
-                if (_uiState.value.reload) {
-                    resetUiState()
-                    _uiState.update { it.copy(reload = false) }
-                    val deti = detiRepository.getAllDeti()
-                    if (deti.isNotEmpty()) {
-                        _uiState.update { currentState ->
-                            currentState.copy(selectUser = deti.first().dietaId, zoznamDeti = deti)
-                        }
-                        setBlokovRozvrhu()
-                        try {
-                            for (item in deti) {
-                                val rozvrhRequest = async { RetrofitClient.apiService.getUserRozvrh(UserId(item.dietaId)).list }
-                                val spravyRequest = async { RetrofitClient.apiService.MobileGetSpravy(UserId(item.dietaId)).list }
-                                val znamkyRequest = async { RetrofitClient.apiService.MobileGetZnamky(UserId(item.dietaId)).list }
-                                val existujucaDatabazaRequest = async { rozvrhRepository.getAllRozvrh() }
-                                val existujuceSpravyRequest = async { spravyRepository.getAllSpravy() }
-
-                                val rozvrh = rozvrhRequest.await()
-                                val spravy = spravyRequest.await()
-                                val znamky = znamkyRequest.await()
-
-                                val existujuciRozvrh = existujucaDatabazaRequest.await()
-                                val existujuceSpravy = existujuceSpravyRequest.await()
-                                val (toAddSpravy, toDeleteSpravy) = PorovnajSpravy(
-                                    spravy,
-                                    existujuceSpravy,
-                                    item.dietaId
-                                )
-                                PridajDoSpravy(toAddSpravy)
-                                OdstranZSpravy(toDeleteSpravy)
-
-                                val (toAddRozrvrh, toDeleteRozvrh, toUpdateRozvrh) = PorovnajDatabazuRozvrh(
-                                    rozvrh,
-                                    existujuciRozvrh,
-                                    item.dietaId
-                                )
-                                PridajDoRozvrhu(toAddRozrvrh)
-                                OdstranZRozvrhu(toDeleteRozvrh)
-                                UpravVRozvrhu(toUpdateRozvrh, item.dietaId)
-
-                                znamkyRepository.deletePredmety(item.dietaId)
-                                for (predmet in znamky) {
-                                    val predmetId = znamkyRepository.vlozitPredmet(Predmety(predmet = predmet.predmet, osobaId = item.dietaId))
-                                    for (kategoria in predmet.kategorie) {
-                                        val kategoriaId = znamkyRepository.vlozitKategoriu(
-                                            Kategorie(predmetId = predmetId.toInt(), kategoriaId = kategoria.kategoria_id,
-                                            max_body = kategoria.max_body, nazov = kategoria.kategoriaNazov, vaha = kategoria.vaha , typ = kategoria.typ_znamky)
-                                        )
-                                        for(znamka in kategoria.znamkyPodpis) {
-                                            znamkyRepository.vlozitZnamka(Znamky(kategoriaId = kategoriaId.toInt(), znamka = znamka.znamka, podpis = 1))
-                                        }
-                                        for(znamka in kategoria.znamkyNePodpis) {
-                                            znamkyRepository.vlozitZnamka(Znamky(kategoriaId = kategoriaId.toInt(), znamka = znamka.znamka, podpis = 0))
-                                        }
-                                    }
-                                }
-                            }
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                        }
+        suspend fun UpdateZnamkyDatabaza(znamky: List<ZnamkyTuple> ,osobaID: Int) {
+            znamkyRepository.deletePredmety(osobaID)
+            znamky.forEach { predmet ->
+                val predmetId = znamkyRepository.vlozitPredmet(Predmety(predmet = predmet.predmet, osobaId = osobaID))
+                predmet.kategorie.forEach { kategoria ->
+                    val kategoriaId = znamkyRepository.vlozitKategoriu(
+                        Kategorie(predmetId = predmetId.toInt(), kategoriaId = kategoria.kategoria_id,
+                            max_body = kategoria.max_body, nazov = kategoria.kategoriaNazov, vaha = kategoria.vaha, typ = kategoria.typ_znamky)
+                    )
+                    kategoria.znamkyPodpis.forEach { znamka ->
+                        znamkyRepository.vlozitZnamka(Znamky(kategoriaId = kategoriaId.toInt(), znamka = znamka.znamka, podpis = 1))
                     }
-                    else {
-                        val osoba = osobaRepository.jePrihlaseny()
-                        if (osoba != null) {
-                            _uiState.update { currentState ->
-                                currentState.copy(selectUser = osoba.osobaId)
-                            }
-                            setBlokovRozvrhu()
-                            try {
-                                val rozvrhRequest =
-                                    async { RetrofitClient.apiService.getUserRozvrh(UserId(osoba.osobaId)).list }
-                                val spravyRequest =
-                                    async { RetrofitClient.apiService.MobileGetSpravy(UserId(osoba.osobaId)).list }
-                                val znamkyRequest =
-                                    async { RetrofitClient.apiService.MobileGetZnamky(UserId(osoba.osobaId)).list }
-                                val existujucaDatabazaRequest =
-                                    async { rozvrhRepository.getAllRozvrh() }
-                                val existujuceSpravyRequest =
-                                    async { spravyRepository.getAllSpravy() }
-
-                                val rozvrh = rozvrhRequest.await()
-                                val spravy = spravyRequest.await()
-                                val znamky = znamkyRequest.await()
-
-                                val existujuciRozvrh = existujucaDatabazaRequest.await()
-                                val existujuceSpravy = existujuceSpravyRequest.await()
-
-                                val (toAddSpravy, toDeleteSpravy) = PorovnajSpravy(
-                                    spravy,
-                                    existujuceSpravy,
-                                    osoba.osobaId
-                                )
-                                PridajDoSpravy(toAddSpravy)
-                                OdstranZSpravy(toDeleteSpravy)
-
-                                val (toAdd, toDelete, toUpdate) = PorovnajDatabazuRozvrh(
-                                    rozvrh,
-                                    existujuciRozvrh,
-                                    osoba.osobaId
-                                )
-                                PridajDoRozvrhu(toAdd)
-                                OdstranZRozvrhu(toDelete)
-                                UpravVRozvrhu(toUpdate, osoba.osobaId)
-
-                                znamkyRepository.deletePredmety(osoba.osobaId)
-                                for (predmet in znamky) {
-                                    val predmetId = znamkyRepository.vlozitPredmet(
-                                        Predmety(
-                                            predmet = predmet.predmet,
-                                            osobaId = osoba.osobaId
-                                        )
-                                    )
-                                    for (kategoria in predmet.kategorie) {
-                                        val kategoriaId = znamkyRepository.vlozitKategoriu(
-                                            Kategorie(
-                                                predmetId = predmetId.toInt(),
-                                                kategoriaId = kategoria.kategoria_id,
-                                                max_body = kategoria.max_body,
-                                                nazov = kategoria.kategoriaNazov,
-                                                vaha = kategoria.vaha,
-                                                typ = kategoria.typ_znamky
-                                            )
-                                        )
-                                        for (znamka in kategoria.znamkyPodpis) {
-                                            znamkyRepository.vlozitZnamka(
-                                                Znamky(
-                                                    kategoriaId = kategoriaId.toInt(),
-                                                    znamka = znamka.znamka,
-                                                    podpis = 1
-                                                )
-                                            )
-                                        }
-                                        for (znamka in kategoria.znamkyNePodpis) {
-                                            znamkyRepository.vlozitZnamka(
-                                                Znamky(
-                                                    kategoriaId = kategoriaId.toInt(),
-                                                    znamka = znamka.znamka,
-                                                    podpis = 0
-                                                )
-                                            )
-                                        }
-                                    }
-                                }
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                            }
-                        }
+                    kategoria.znamkyNePodpis.forEach { znamka ->
+                        znamkyRepository.vlozitZnamka(Znamky(kategoriaId = kategoriaId.toInt(), znamka = znamka.znamka, podpis = 0))
                     }
-                    setBlokovRozvrhu()
                 }
             }
+            try {
+                val znamkaZprepoctu = RetrofitClient.apiService.MobileGetRozsahZnamok(znamkyRepository.getAllKategoriaId()).list
+                znamkaZprepoctu.forEach { znamka ->
+                    znamkyRepository.VlozitNaPrepocet(ZnamkaNaPrepocet(
+                        kategoriaId = znamka.kategoria_id,
+                        znamka = znamka.znamka,
+                        rozsah_do = znamka.znamka_do,
+                        rozsah_od = znamka.znamka_od))
+                }
+            } catch (_: Exception) {
+
+            }
         }
+
 
         fun ChangeSelectUser(newSelectUserID: Int) {
             _uiState.update { currentState ->
@@ -466,6 +307,23 @@
         suspend fun OdstranZSpravy(zoznam: List<Int>){
             for (item in zoznam) {
                 spravyRepository.deleteSprava(item)
+            }
+        }
+
+        suspend fun PridajDoDochadzky(zoznam: List<dochadzkaDen>, osobaID: Int) {
+            dochadzkaRepository.deleteAllDochadzka(osobaID)
+            for (den in zoznam) {
+                for (blok in den.bloky) {
+                    dochadzkaRepository.insertdochadzka(Dochadzka(
+                        osobaId = osobaID,
+                        typ = blok.typ,
+                        den = den.datum,
+                        block = blok.block,
+                        ospravedlnene = blok.ospravedlnene,
+                        id_dochadza = blok.id_dochadza,
+                        poznamka = blok.poznamka
+                    ))
+                }
             }
         }
     }

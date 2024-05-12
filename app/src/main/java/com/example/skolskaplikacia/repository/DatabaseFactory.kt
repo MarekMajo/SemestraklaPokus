@@ -2,6 +2,7 @@ package com.example.skolskaplikacia.repository
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.example.skolskaplikacia.viewModels.DochadzkaViewModel
 import com.example.skolskaplikacia.viewModels.LoginViewModel
 import com.example.skolskaplikacia.viewModels.MenuViewModel
 import com.example.skolskaplikacia.viewModels.RozsireneZnamkyViewModel
@@ -14,7 +15,8 @@ class DatabaseFactory(
     private val rozvrhRepository: RozvrhRepository,
     private val detiRepository: DetiRepository,
     private val spravyRepository: SpravyRepository,
-    private val znamkyRepository: ZnamkyRepository
+    private val znamkyRepository: ZnamkyRepository,
+    private val dochadzkaRepository: DochadzkaRepository
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return when {
@@ -22,7 +24,7 @@ class DatabaseFactory(
                 LoginViewModel(osobaRepository, rozvrhRepository, detiRepository, spravyRepository, znamkyRepository) as T
             }
             modelClass.isAssignableFrom(MenuViewModel::class.java) -> {
-                MenuViewModel(osobaRepository, rozvrhRepository, detiRepository, spravyRepository, znamkyRepository) as T
+                MenuViewModel(osobaRepository, rozvrhRepository, detiRepository, spravyRepository, znamkyRepository, dochadzkaRepository) as T
             }
             modelClass.isAssignableFrom(SpravyViewModel::class.java) -> {
                 SpravyViewModel(spravyRepository) as T
@@ -35,6 +37,9 @@ class DatabaseFactory(
             }
             modelClass.isAssignableFrom(RozvrhViewModel::class.java) -> {
                 RozvrhViewModel(rozvrhRepository) as T
+            }
+            modelClass.isAssignableFrom(DochadzkaViewModel::class.java) -> {
+                DochadzkaViewModel(dochadzkaRepository) as T
             }
             else -> throw IllegalArgumentException("Unknown ViewModel class")
         }

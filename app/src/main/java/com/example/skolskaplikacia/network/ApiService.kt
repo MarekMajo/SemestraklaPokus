@@ -27,4 +27,7 @@ interface ApiService {
 
     @POST("MobileGetPodpisanieZnamok")
     suspend fun MobileGetPodpisanieZnamok(@Body PoziadavkyNaPodpisZnamok: PoziadavkyNaPodpisZnamok)
+
+    @POST("MobileGetDochadzka")
+    suspend fun MobileGetDochadzka(@Body userId: UserId):Dochadzka
 }

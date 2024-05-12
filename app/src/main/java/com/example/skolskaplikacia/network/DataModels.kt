@@ -20,6 +20,8 @@ data class PrazdnyReturn(val id: Int)
 
 data class PoziadavkyNaPodpisZnamok(val kategorieAllid: List<Int>, val userId: Int)
 
+data class Dochadzka(val list: List<dochadzkaDen>)
+
 data class kategorieZnamky(
     val kategoria_id: Int,
     val znamka: Int,
@@ -66,4 +68,17 @@ data class KategorieTuple(
 data class Znamka(
     val znamka: Int,
     val znamkaId: Int
+)
+
+data class dochadzkaDen(
+    val datum: String,
+    val bloky: List<blokyDna>
+)
+
+data class blokyDna(
+    val block: Int,
+    val typ: Int,
+    val poznamka: Int,
+    val ospravedlnene: Int,
+    val id_dochadza: Int
 )
