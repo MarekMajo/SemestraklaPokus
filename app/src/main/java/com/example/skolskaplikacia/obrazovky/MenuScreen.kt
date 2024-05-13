@@ -133,11 +133,9 @@ fun MenuScreen(
 @Composable
 fun UzivatelButton(meno: String, priezvisko: String, loginViewModel: LoginViewModel) {
     var expanded by remember { mutableStateOf(false) }
-
     Box(modifier = Modifier
         .padding(15.dp)
-        .background(Color.White)
-        .border(BorderStroke(1.dp, Color.Black))
+        .background(Color.White.copy(alpha = 0.01F))
         .padding(5.dp),
         contentAlignment = Alignment.TopStart
     ) {
@@ -165,8 +163,7 @@ fun DetiButton(zoznam: List<Deti>, menuViewModel: MenuViewModel , uiStatemenu: M
         Box(
             modifier = Modifier
                 .padding(15.dp)
-                .background(Color.White)
-                .border(BorderStroke(1.dp, Color.Black))
+                .background(Color.White.copy(alpha = 0.01F))
                 .padding(5.dp),
             contentAlignment = Alignment.TopEnd
         ) {

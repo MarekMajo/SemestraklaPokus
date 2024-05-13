@@ -119,7 +119,7 @@ fun RozsireneZnamkyScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Button(
-                            onClick = { navController.popBackStack("${Obrazovky.známky.name}/${uiStateRZ.userId}", inclusive = false) },
+                            onClick = { navController.popBackStack("${Obrazovky.známky.name}/${uiStateRZ.userId}/${rodic}", inclusive = false) },
                             colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
                         ) {
                             Image(
@@ -158,7 +158,7 @@ fun RozsireneZnamkyScreen(
                         if (rodic == 1) {
                             Button(
                                 onClick = { RZViewModel.PodpisanieZnamok() },
-                                colors = ButtonDefaults.buttonColors(containerColor = Color.Magenta)
+                                colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.1F), contentColor = Color.Black)
                             ) {
                                 Text(text = "Podpísať")
                             }
