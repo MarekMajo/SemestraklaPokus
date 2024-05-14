@@ -1,11 +1,13 @@
 package com.example.skolskaplikacia.viewModels
 
+import android.content.Context
+import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.room.util.foreignKeyCheck
+import androidx.navigation.NavController
+import com.example.skolskaplikacia.Obrazovky
 import com.example.skolskaplikacia.network.PoziadavkyNaPodpisZnamok
 import com.example.skolskaplikacia.network.RetrofitClient
-import com.example.skolskaplikacia.network.UserId
 import com.example.skolskaplikacia.repository.ZnamkyRepository
 import com.example.skolskaplikacia.uiStates.Kategorie
 import com.example.skolskaplikacia.uiStates.RozsireneZnamkyUiState
@@ -17,7 +19,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class RozsireneZnamkyViewModel (
-    private val znamkyRepository: ZnamkyRepository
+    private val znamkyRepository: ZnamkyRepository,
+    private val menuViewModel: MenuViewModel
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(RozsireneZnamkyUiState(predmetId = 0, nazovPredmetu = "", zoznamKategorii = listOf(), priemer = "", userId = 0))
     val uiState: StateFlow<RozsireneZnamkyUiState> = _uiState.asStateFlow()
@@ -78,7 +81,7 @@ class RozsireneZnamkyViewModel (
             ) }
         }
     }
-    fun PodpisanieZnamok() {
+    fun PodpisanieZnamok(navController: NavController, rodic: Int, context: Context) {
         viewModelScope.launch {
             val userId = uiState.value.userId
             val predmety = znamkyRepository.getAllPredmety(userId)
@@ -88,7 +91,13 @@ class RozsireneZnamkyViewModel (
                 val kategoriePredmetu = kategorie.filter { it.predmetId == predmet.predmetId }
                 vysledok.addAll(kategoriePredmetu.map { it.kategoriaId })
             }
-            RetrofitClient.apiService.MobileGetPodpisanieZnamok(PoziadavkyNaPodpisZnamok(vysledok, userId))
+            try {
+                RetrofitClient.apiService.MobileGetPodpisanieZnamok(PoziadavkyNaPodpisZnamok(vysledok, userId))
+                menuViewModel.LoadData(context)
+                navController.popBackStack("${Obrazovky.známky.name}/${userId}/${rodic}", inclusive = false)
+            } catch (e: Exception) {
+                Toast.makeText(context, "Chyba spojenia so serverom", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }

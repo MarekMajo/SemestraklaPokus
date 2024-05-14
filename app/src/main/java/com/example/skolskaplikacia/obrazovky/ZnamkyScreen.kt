@@ -31,15 +31,13 @@ import com.example.skolskaplikacia.Obrazovky
 import com.example.skolskaplikacia.R
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Text
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.skolskaplikacia.uiStates.VysledokPredmetu
-import com.example.skolskaplikacia.viewModels.MenuViewModel
 import com.example.skolskaplikacia.viewModels.ZnamkyViewModel
 
 @Composable
@@ -52,6 +50,7 @@ fun ZnamkyScreen(
 ) {
     val uiStateznamky by znamkyViewModel.uiState.collectAsState()
     val configuration = LocalConfiguration.current
+    val context = LocalContext.current
     val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
     var prvaCast = 0.05F
     var druhaCast = 0.95F
@@ -60,9 +59,7 @@ fun ZnamkyScreen(
         druhaCast = 0.8F
     }
     LaunchedEffect(userId){
-        if (userId != uiStateznamky.selectUser) {
-            znamkyViewModel.vytvorZnamkyVysledok(userId)
-        }
+        znamkyViewModel.vytvorZnamkyVysledok(userId)
     }
 
     Column(modifier = modifier.fillMaxSize()) {
@@ -95,7 +92,7 @@ fun ZnamkyScreen(
                 if (rodic == 1) {
                     Button(
                         colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-                        onClick = { znamkyViewModel.PodpisanieZnamok() }
+                        onClick = { znamkyViewModel.PodpisanieZnamok(context) }
                     ) {
                         Text(text = "Podpísať")
                     }

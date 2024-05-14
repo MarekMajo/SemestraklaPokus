@@ -30,10 +30,12 @@ class DatabaseFactory(
                 SpravyViewModel(spravyRepository) as T
             }
             modelClass.isAssignableFrom(ZnamkyViewModel::class.java) -> {
-                ZnamkyViewModel(znamkyRepository) as T
+                val menuViewModel = MenuViewModel(osobaRepository, rozvrhRepository, detiRepository, spravyRepository, znamkyRepository, dochadzkaRepository)
+                ZnamkyViewModel(znamkyRepository, menuViewModel) as T
             }
             modelClass.isAssignableFrom(RozsireneZnamkyViewModel::class.java) -> {
-                RozsireneZnamkyViewModel(znamkyRepository) as T
+                val menuViewModel = MenuViewModel(osobaRepository, rozvrhRepository, detiRepository, spravyRepository, znamkyRepository, dochadzkaRepository)
+                RozsireneZnamkyViewModel(znamkyRepository, menuViewModel) as T
             }
             modelClass.isAssignableFrom(RozvrhViewModel::class.java) -> {
                 RozvrhViewModel(rozvrhRepository) as T

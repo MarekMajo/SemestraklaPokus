@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -53,6 +54,7 @@ fun RozsireneZnamkyScreen(
         if (predmetID != uiStateRZ.predmetId) RZViewModel.loadData(predmetID)
     }
     val configuration = LocalConfiguration.current
+    val context = LocalContext.current
     val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
     var prvaCast = 0.2F
     var druhaCast = 0.8F
@@ -104,7 +106,7 @@ fun RozsireneZnamkyScreen(
                         Spacer(modifier = Modifier.weight(1f))
                         if (rodic == 1) {
                             Button(
-                                onClick = { RZViewModel.PodpisanieZnamok() },
+                                onClick = { RZViewModel.PodpisanieZnamok(navController, rodic, context) },
                                 colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.1F), contentColor = Color.Black)
                             ) {
                                 Text(text = "Podpísať")
@@ -157,7 +159,7 @@ fun RozsireneZnamkyScreen(
                         Spacer(modifier = Modifier.weight(1f))
                         if (rodic == 1) {
                             Button(
-                                onClick = { RZViewModel.PodpisanieZnamok() },
+                                onClick = { RZViewModel.PodpisanieZnamok(navController, rodic, context) },
                                 colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.1F), contentColor = Color.Black)
                             ) {
                                 Text(text = "Podpísať")

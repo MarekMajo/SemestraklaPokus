@@ -6,7 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 @Database(entities = [Osoba::class, Rozvrh::class, Deti::class, Spravy::class,
-                     Predmety::class, Kategorie::class, Znamky::class, ZnamkaNaPrepocet::class, Dochadzka::class], version = 2, exportSchema = false)
+                     Predmety::class, Kategorie::class, Znamky::class, ZnamkaNaPrepocet::class, Dochadzka::class], version = 1, exportSchema = false)
 abstract class AppDatabaza : RoomDatabase() {
     abstract fun osobaDao(): OsobaDao
     abstract fun rozvrhDao(): RozvrhDao

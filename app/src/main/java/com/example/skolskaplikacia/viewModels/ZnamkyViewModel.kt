@@ -1,12 +1,11 @@
 package com.example.skolskaplikacia.viewModels
 
+import android.content.Context
+import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.skolskaplikacia.network.PoziadavkyNaPodpisZnamok
 import com.example.skolskaplikacia.network.RetrofitClient
-import com.example.skolskaplikacia.network.UserId
-import com.example.skolskaplikacia.repository.DetiRepository
-import com.example.skolskaplikacia.repository.OsobaRepository
 import com.example.skolskaplikacia.repository.ZnamkyRepository
 import com.example.skolskaplikacia.uiStates.VysledokPredmetu
 import com.example.skolskaplikacia.uiStates.Znamka
@@ -18,7 +17,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ZnamkyViewModel (
-    private val znamkyRepository: ZnamkyRepository
+    private val znamkyRepository: ZnamkyRepository,
+    private val menuViewModel: MenuViewModel
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ZnamkyUiState(predmetyZiaka = listOf(), selectUser = 0))
     val uiState: StateFlow<ZnamkyUiState> = _uiState.asStateFlow()
@@ -71,7 +71,7 @@ class ZnamkyViewModel (
         }
     }
 
-    fun PodpisanieZnamok() {
+    fun PodpisanieZnamok(context: Context) {
         viewModelScope.launch {
             val userId = uiState.value.selectUser
             val predmety = znamkyRepository.getAllPredmety(userId)
@@ -83,8 +83,10 @@ class ZnamkyViewModel (
             }
             try {
                 RetrofitClient.apiService.MobileGetPodpisanieZnamok(PoziadavkyNaPodpisZnamok(vysledok, userId))
+                menuViewModel.LoadData(context)
+                vytvorZnamkyVysledok(userId)
             } catch (e: Exception) {
-                println(e)
+                Toast.makeText(context, "Chyba spojenia so serverom", Toast.LENGTH_SHORT).show()
             }
         }
     }

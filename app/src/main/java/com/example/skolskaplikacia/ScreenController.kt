@@ -70,6 +70,7 @@ fun Aplikacia(
     val spravyViewModel: SpravyViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository, spravyRepository, znamkyRepository, dochadzkaRepository))
     val rozvrhViewModel: RozvrhViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository, spravyRepository, znamkyRepository, dochadzkaRepository))
     val dochadzkaViewModel: DochadzkaViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository, spravyRepository, znamkyRepository, dochadzkaRepository))
+    //val znamkyViewModel: ZnamkyViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository, spravyRepository, znamkyRepository, dochadzkaRepository))
     val znamkyViewModel: ZnamkyViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository, spravyRepository, znamkyRepository, dochadzkaRepository))
     val rozsireneZnamkyViewModel: RozsireneZnamkyViewModel = viewModel(factory = DatabaseFactory(osobaRepository, rozvrhRepository, detiRepository, spravyRepository, znamkyRepository, dochadzkaRepository))
     val uiState by loginViewModel.uiState.collectAsState()

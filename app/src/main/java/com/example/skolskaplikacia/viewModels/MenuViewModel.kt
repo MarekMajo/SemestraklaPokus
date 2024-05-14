@@ -1,5 +1,7 @@
     package com.example.skolskaplikacia.viewModels
 
+    import android.content.Context
+    import android.widget.Toast
     import androidx.lifecycle.ViewModel
     import androidx.lifecycle.viewModelScope
     import com.example.skolskaplikacia.databaza.Dochadzka
@@ -87,68 +89,65 @@
             }
         }
 
-        fun LoadData() {
-            viewModelScope.launch {
-                if (_uiState.value.reload) {
-                    resetUiState()
-                    _uiState.update { it.copy(reload = false) }
-                    val (existRozvrh, existSpravy) = DatabaseRequest()
-                    val deti = detiRepository.getAllDeti()
-                    if (deti.isNotEmpty()) {
-                        _uiState.update { it.copy(selectUser = deti.first().dietaId, zoznamDeti = deti) }
-                        setBlokovRozvrhu()
-                        deti.forEach { item ->
-                            val (rozvrh, spravy, znamky, dochadzka) = ServerRequest(item.dietaId)
-                            if (rozvrh.isNotEmpty()) {
-                                val (toAddRozrvrh, toDeleteRozvrh, toUpdateRozvrh) = PorovnajDatabazuRozvrh(rozvrh, existRozvrh, item.dietaId)
-                                PridajDoRozvrhu(toAddRozrvrh)
-                                OdstranZRozvrhu(toDeleteRozvrh)
-                                UpravVRozvrhu(toUpdateRozvrh, item.dietaId)
-                            }
-                            if (spravy.isNotEmpty()) {
-                                val (toAddSpravy, toDeleteSpravy) = PorovnajSpravy(spravy, existSpravy, item.dietaId)
-                                PridajDoSpravy(toAddSpravy)
-                                OdstranZSpravy(toDeleteSpravy)
-                            }
-                            if (dochadzka.isNotEmpty()) {
-                                PridajDoDochadzky(dochadzka, item.dietaId)
-                            }
-                            if (znamky.isNotEmpty()) {
-                                UpdateZnamkyDatabaza(znamky, item.dietaId)
-                            }
-
+        suspend fun LoadData(context: Context) {
+            if (_uiState.value.reload) {
+                resetUiState()
+                _uiState.update { it.copy(reload = false) }
+                val (existRozvrh, existSpravy) = DatabaseRequest()
+                val deti = detiRepository.getAllDeti()
+                if (deti.isNotEmpty()) {
+                    _uiState.update { it.copy(selectUser = deti.first().dietaId, zoznamDeti = deti) }
+                    setBlokovRozvrhu()
+                    deti.forEach { item ->
+                        val (rozvrh, spravy, znamky, dochadzka) = ServerRequest(item.dietaId, context)
+                        if (rozvrh.isNotEmpty()) {
+                            val (toAddRozrvrh, toDeleteRozvrh, toUpdateRozvrh) = PorovnajDatabazuRozvrh(rozvrh, existRozvrh, item.dietaId)
+                            PridajDoRozvrhu(toAddRozrvrh)
+                            OdstranZRozvrhu(toDeleteRozvrh)
+                            UpravVRozvrhu(toUpdateRozvrh, item.dietaId)
                         }
-                    } else {
-                        val osoba = osobaRepository.jePrihlaseny()
-                        if (osoba != null) {
-                            _uiState.update { it.copy(reload = false, selectUser = osoba.osobaId) }
-                            setBlokovRozvrhu()
-                            val (rozvrh, spravy, znamky, dochadzka) = ServerRequest(osoba.osobaId)
-                            if (rozvrh.isNotEmpty()) {
-                                val (toAddRozrvrh, toDeleteRozvrh, toUpdateRozvrh) = PorovnajDatabazuRozvrh(rozvrh, existRozvrh, osoba.osobaId)
-                                PridajDoRozvrhu(toAddRozrvrh)
-                                OdstranZRozvrhu(toDeleteRozvrh)
-                                UpravVRozvrhu(toUpdateRozvrh, osoba.osobaId)
-                            }
-                            if (spravy.isNotEmpty()) {
-                                val (toAddSpravy, toDeleteSpravy) = PorovnajSpravy(spravy, existSpravy, osoba.osobaId)
-                                PridajDoSpravy(toAddSpravy)
-                                OdstranZSpravy(toDeleteSpravy)
-                            }
-                            if (dochadzka.isNotEmpty()) {
-                                PridajDoDochadzky(dochadzka, osoba.osobaId)
-                            }
-                            if (znamky.isNotEmpty()) {
-                                UpdateZnamkyDatabaza(znamky, osoba.osobaId)
-                            }
+                        if (spravy.isNotEmpty()) {
+                            val (toAddSpravy, toDeleteSpravy) = PorovnajSpravy(spravy, existSpravy, item.dietaId)
+                            PridajDoSpravy(toAddSpravy)
+                            OdstranZSpravy(toDeleteSpravy)
+                        }
+                        if (dochadzka.isNotEmpty()) {
+                            PridajDoDochadzky(dochadzka, item.dietaId)
+                        }
+                        if (znamky.isNotEmpty()) {
+                            UpdateZnamkyDatabaza(znamky, item.dietaId)
                         }
                     }
-                    setBlokovRozvrhu()
+                } else {
+                    val osoba = osobaRepository.jePrihlaseny()
+                    if (osoba != null) {
+                        _uiState.update { it.copy(reload = false, selectUser = osoba.osobaId) }
+                        setBlokovRozvrhu()
+                        val (rozvrh, spravy, znamky, dochadzka) = ServerRequest(osoba.osobaId, context)
+                        if (rozvrh.isNotEmpty()) {
+                            val (toAddRozrvrh, toDeleteRozvrh, toUpdateRozvrh) = PorovnajDatabazuRozvrh(rozvrh, existRozvrh, osoba.osobaId)
+                            PridajDoRozvrhu(toAddRozrvrh)
+                            OdstranZRozvrhu(toDeleteRozvrh)
+                            UpravVRozvrhu(toUpdateRozvrh, osoba.osobaId)
+                        }
+                        if (spravy.isNotEmpty()) {
+                            val (toAddSpravy, toDeleteSpravy) = PorovnajSpravy(spravy, existSpravy, osoba.osobaId)
+                            PridajDoSpravy(toAddSpravy)
+                            OdstranZSpravy(toDeleteSpravy)
+                        }
+                        if (dochadzka.isNotEmpty()) {
+                            PridajDoDochadzky(dochadzka, osoba.osobaId)
+                        }
+                        if (znamky.isNotEmpty()) {
+                            UpdateZnamkyDatabaza(znamky, osoba.osobaId)
+                        }
+                    }
                 }
+                setBlokovRozvrhu()
             }
         }
 
-        suspend fun ServerRequest(userId: Int):Quadruple <List<RozvrhTuple>, List<SpravyTuple>, List<ZnamkyTuple>, List<dochadzkaDen>> {
+        suspend fun ServerRequest(userId: Int, context: Context):Quadruple <List<RozvrhTuple>, List<SpravyTuple>, List<ZnamkyTuple>, List<dochadzkaDen>> {
 
             val dochadzkaDeferred = viewModelScope.async {
                 try {
@@ -186,6 +185,7 @@
             val spravy = spravyDeferred.await()
             val znamky = znamkyDeferred.await()
             val dochadzka = dochadzkaDeferred.await()
+            if (rozvrh.isEmpty() or spravy.isEmpty() or znamky.isEmpty() or dochadzka.isEmpty()) Toast.makeText(context, "Chyba spojenia so serverom", Toast.LENGTH_SHORT).show()
             return Quadruple(rozvrh, spravy, znamky, dochadzka)
         }
 
